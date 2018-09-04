@@ -46,9 +46,9 @@
 <div class="top-nav">
     <div class="container">
         <div class="d-flex align-items-center flex-wrap">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center dcr-icon-container">
                 <div class="col-sm-auto" style="padding: 0 2px">
-                    <a href="/" class="no-underline"><img src="/images/logo.png" alt="dcr icon"></a>
+                    <a href="/" class="no-underline"><img class="dcr-icon" src="/images/logo.png" alt="dcr icon"></a>
                 </div>
             </div>
             <div class="col pl-2">
@@ -829,15 +829,16 @@ const app = Stimulus.Application.start()
 {{define "decimalParts"}}
     {{if eq (len .) 4}}
         <span class="int">{{ index . 0 }}.{{ index . 1 }}</span>
-        <span class="decimal lh15rem">{{ index . 2 }}</span>
-        <span class="decimal lh15rem trailing-zeroes">{{ index . 3 }}</span>
+        {{if gt (len (index . 2)) 0}}
+            <span class="decimal lh15rem">{{ index . 2 }}</span>
+            <span class="decimal lh15rem trailing-zeroes">{{ index . 3 }}</span>
+        {{end}}
     {{else}}
         <span class="int">{{ index . 0 }}</span>
-        {{if (gt (len (index . 1)) 0) | (gt (len (index . 2)) 0)}}
+        {{if gt (len (index . 1)) 0}}
             <span class="dot">.</span>
-            <span class="decimal">{{ index . 1 }}
-                <span class="trailing-zeroes">{{ index . 2 }}</span>
-            </span>
+            <span class="decimal lh15rem">{{ index . 1 }} </span>
+            <span class="decimal lh15rem trailing-zeroes">{{ index . 2 }}</span>
         {{end}}
     {{end}}
 {{end}}

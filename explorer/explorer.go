@@ -44,8 +44,6 @@ type explorerDataSourceLite interface {
 	GetExplorerBlocks(start int, end int) []*BlockBasic
 	GetBlockHeight(hash string) (int64, error)
 	GetBlockHash(idx int64) (string, error)
-	GetBlockVerboseByHash(hash string, verboseTx bool) *dcrjson.GetBlockVerboseResult
-	GetExplorerFullBlocks(start int, end int) []*BlockInfo
 	GetExplorerTx(txid string) *TxInfo
 	GetExplorerAddress(address string, count, offset int64) *AddressInfo
 	DecodeRawTransaction(txhex string) (*dcrjson.TxRawResult, error)
@@ -131,20 +129,20 @@ func TicketStatusText(s dbtypes.TicketSpendType, p dbtypes.TicketPoolStatus) str
 }
 
 type explorerUI struct {
-	Mux              *chi.Mux
-	blockData        explorerDataSourceLite
-	explorerSource   explorerDataSource
-	liteMode         bool
-	devPrefetch      bool
-	templates        templates
-	wsHub            *WebsocketHub
-	NewBlockDataMtx  sync.RWMutex
-	NewFullBlockData *BlockInfo
-	ExtraInfo        *HomeInfo
-	MempoolData      *MempoolInfo
-	ChainParams      *chaincfg.Params
-	Version          string
-	NetName          string
+	Mux             *chi.Mux
+	blockData       explorerDataSourceLite
+	explorerSource  explorerDataSource
+	liteMode        bool
+	devPrefetch     bool
+	templates       templates
+	wsHub           *WebsocketHub
+	NewBlockDataMtx sync.RWMutex
+	NewBlockData    *BlockBasic
+	ExtraInfo       *HomeInfo
+	MempoolData     *MempoolInfo
+	ChainParams     *chaincfg.Params
+	Version         string
+	NetName         string
 }
 
 func (exp *explorerUI) reloadTemplates() error {
@@ -311,41 +309,20 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	// Lock for explorerUI's NewBlockData and ExtraInfo
 	exp.NewBlockDataMtx.Lock()
 
-	hash, _ := exp.blockData.GetBlockHash(int64(bData.Height))
-	newBlockData := exp.blockData.GetExplorerBlock(hash)
-	bdHeight := newBlockData.Height
-	/**newBlockData := &BlockInfo{
-		BlockBasic: &BlockBasic{Height: int64(bData.Height),
+	newBlockData := &BlockBasic{
+		Height:         int64(bData.Height),
+		Hash:           blockData.Header.Hash,
 		Voters:         bData.Voters,
 		FreshStake:     bData.FreshStake,
 		Size:           int32(bData.Size),
 		Transactions:   bData.TxLen,
 		BlockTime:      bData.Time,
 		FormattedTime:  bData.FormattedTime,
-		FormattedBytes: humanize.Bytes(uint64(bData.Size))
-		Revocations:    uint32(bData.Revocations)},
-		Hash:                  bFullData.Hash,
-		Version:               bFullData.Version,
-		Confirmations:         bFullData.Confirmations,
-		StakeRoot:             bFullData.StakeRoot,
-		MerkleRoot:            bFullData.MerkleRoot,
-		Nonce:                 bFullData.Nonce,
-		VoteBits:              bFullData.VoteBits,
-		FinalState:            bFullData.FinalState,
-		PoolSize:              bFullData.PoolSize,
-		Bits:                  bFullData.Bits,
-		SBits:                 bFullData.SBits,
-		Difficulty:            bFullData.Difficulty,
-		ExtraData:             bFullData.ExtraData,
-		StakeVersion:          bFullData.StakeVersion,
-		PreviousHash:          bFullData.PreviousHash,
-		NextHash:              bFullData.NextHash,
-		StakeValidationHeight: exp.ChainParams.StakeValidationHeight,
-	}**/
-	exp.NewFullBlockData = newBlockData
-	// percentage := func(a float64, b float64) float64 {
-	// 	return (a / b) * 100
-	// }
+		FormattedBytes: humanize.Bytes(uint64(bData.Size)),
+		Revocations:    uint32(bData.Revocations),
+	}
+	exp.NewBlockData = newBlockData
+	bdHeight := newBlockData.Height
 
 	stakePerc := blockData.PoolInfo.Value / dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
 
@@ -469,6 +446,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	if exp.ChainParams.Name != "mainnet" {
 		return 0, ""
 	}
+
 	BlocksPerDay := 86400 / exp.ChainParams.TargetTimePerBlock.Seconds()
 	BlocksPerYear := 365 * BlocksPerDay
 	TicketsPurchased := float64(0)
