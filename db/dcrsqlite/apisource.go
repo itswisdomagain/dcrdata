@@ -1047,9 +1047,11 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 		return nil
 	}
 
+	b := makeExplorerBlockBasic(data)
+
 	// Explorer Block Info
 	block := &explorer.BlockInfo{
-		BlockBasic:            makeExplorerBlockBasic(data),
+		BlockBasic:            b,
 		Version:               data.Version,
 		Confirmations:         data.Confirmations,
 		StakeRoot:             data.StakeRoot,
@@ -1066,6 +1068,7 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 		PreviousHash:          data.PreviousHash,
 		NextHash:              data.NextHash,
 		StakeValidationHeight: db.params.StakeValidationHeight,
+		AllTxs:                (uint8(b.Voters) + uint8(b.Transactions) + b.FreshStake),
 	}
 
 	votes := make([]*explorer.TxBasic, 0, block.Voters)

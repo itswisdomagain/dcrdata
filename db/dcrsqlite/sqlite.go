@@ -66,7 +66,6 @@ type DB struct {
 	getStakeInfoWinnersSQL                                       string
 	getAllPoolValSize                                            string
 	getAllFeeInfoPerBlock                                        string
-	getLast24HrDifficulty                                        string
 }
 
 // NewDB creates a new DB instance with pre-generated sql statements from an

@@ -139,7 +139,7 @@ type explorerUI struct {
 	templates       templates
 	wsHub           *WebsocketHub
 	NewBlockDataMtx sync.RWMutex
-	NewBlockData    *BlockBasic
+	NewBlockData    *BlockInfo
 	ExtraInfo       *HomeInfo
 	MempoolData     *MempoolInfo
 	ChainParams     *chaincfg.Params
@@ -299,7 +299,7 @@ func (exp *explorerUI) prePopulateChartsData() {
 	log.Info("Done Pre-populating the charts data")
 }
 
-func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) error {
+func (exp *explorerUI) Store(blockData *blockdata.BlockData, val *wire.MsgBlock) error {
 	bData := blockData.ToBlockExplorerSummary()
 
 	// Update the charts data after every five blocks or if no charts data
@@ -311,20 +311,9 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	// Lock for explorerUI's NewBlockData and ExtraInfo
 	exp.NewBlockDataMtx.Lock()
 
-	newBlockData := &BlockBasic{
-		Height:         int64(bData.Height),
-		Hash:           blockData.Header.Hash,
-		Voters:         bData.Voters,
-		FreshStake:     bData.FreshStake,
-		Size:           int32(bData.Size),
-		Transactions:   bData.TxLen,
-		BlockTime:      bData.Time,
-		FormattedTime:  bData.FormattedTime,
-		FormattedBytes: humanize.Bytes(uint64(bData.Size)),
-		Revocations:    uint32(bData.Revocations),
-	}
-	exp.NewBlockData = newBlockData
-	bdHeight := newBlockData.Height
+	// Returns the Block with some more data needed for the full block visualization.
+	exp.NewBlockData = exp.blockData.GetExplorerBlock(val.BlockHash().String())
+	bdHeight := exp.NewBlockData.Height
 	difficulty := blockData.Header.Difficulty
 
 	stakePerc := blockData.PoolInfo.Value / dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()

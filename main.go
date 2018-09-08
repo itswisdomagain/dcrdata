@@ -449,12 +449,12 @@ func mainCore() error {
 
 	// Initial data summary for web ui. stakedb must be at the same height, so
 	// we get do this before starting the monitors.
-	blockData, _, err := collector.Collect()
+	blockData, val, err := collector.Collect()
 	if err != nil {
 		return fmt.Errorf("Block data collection for initial summary failed: %v",
 			err.Error())
 	}
-	if err = explore.Store(blockData, nil); err != nil {
+	if err = explore.Store(blockData, val); err != nil {
 		return fmt.Errorf("Failed to store initial block data for explorer pages: %v", err.Error())
 	}
 
