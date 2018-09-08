@@ -7,7 +7,9 @@
     <div id="mainContainer" class="container" data-controller="main">
         <div class="row">
             <div class="col-lg-6 networkStatsWrapper font-weight-bold">
-                <h3 class="title font-weight-bold" >{{.NetName}} Network Statistics</h3>
+                <a class="no-underline" href="/statistics">
+                    <h3 class="title font-weight-bold" >{{.NetName}} Network Statistics</h3>
+                </a>
                 {{with .Info}}
                 <div class="statCard general">
                     <div class="row">
@@ -63,12 +65,12 @@
                         <div class="col-sm-4">
                             <div class="heading">Total Locked DCR</div>
                             <div class="data mono lh1rem fs14-decimal count fs24 p03rem0">
-                                {{template "decimalParts" (float64AsDecimalParts (toFloat64Amount .CoinSupply) 0 true)}}
+                                {{template "decimalParts" (float64AsDecimalParts .PoolInfo.Value 0 true)}}
                                 <span class="subcount"></span>
                                 <span class="pl-1 unit lh15rem">DCR</span>
                             </div>
                             <div class="subdata">
-                                <span class="count" id="pool_size_percentage">({{printf "%.2f" .PoolInfo.Percentage}}% of total supply)</span>
+                                <span class="count" id="pool_size_percentage">({{printf "%.2f" .PoolInfo.Percentage}} % of total supply)</span>
                             </div>
                         </div>
                         <div class="col-sm-4">
@@ -79,12 +81,13 @@
                                 <span class="pl-1 unit lh15rem" style="font-size:13px;">DCR/vote</span>
                             </div>
                             <div class="subdata">
-                                <span id="ticket_reward" class="count green mono lh1rem">(
-                                    <span style="color:green;">+{{printf "%.2f" .TicketReward}}%</span> per ~{{.RewardPeriod}})</span>
+                                <span id="ticket_reward" class="count">({{template "fmtPercentage" .TicketReward}} per ~{{.RewardPeriod}})</span>
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <div class="heading">Ticket Price</div>
+                            <div class="heading">
+                                <a class="no-underline" href="/charts#ticket-price">Ticket Price</a>
+                            </div>
                             <div id="coin_supply" class="data mono lh1rem fs14-decimal count fs24 p03rem0">
                                 {{template "decimalParts" (float64AsDecimalParts .StakeDiff 8 false 2)}}
                                 <span class="subcount"></span>
@@ -104,7 +107,9 @@
                             <span><img src="/images/mining.png" alt="mining"><p class="statcard-title">Mining</p></span>
                         </div>
                         <div class="col-sm-4">
-                            <div class="heading">Difficulty</div>
+                            <div class="heading">
+                                <a class="no-underline" href="/charts#pow-difficulty">Difficulty</a>
+                            </div>
                             <div id="difficulty" class="data mono lh1rem fs14-decimal count fs24 p03rem0">
                                 {{template "decimalParts" (float64AsDecimalParts (divideFloat .Difficulty 1000000.0) 0 true)}}
                                 <span class="subcount"></span>
@@ -130,12 +135,12 @@
                         <div class="col-sm-4">
                             <div class="heading">Hashrate</div>
                             <div class="data mono lh1rem fs14-decimal count fs24 p03rem0">
-                                {{template "decimalParts" (float64AsDecimalParts 145.6787778302 8 false 2)}}
+                                {{template "decimalParts" (float64AsDecimalParts .HashRate 8 true 2)}}
                                 <span class="subcount"></span>
-                                <span class="pl-1 unit lh15rem">Th/s</span>
+                                <span class="pl-1 unit lh15rem">Ph/s</span>
                             </div>
                             <div class="subdata">
-                                <span class="count">(<span style="color:green;">+4.24%</span> in 24h)</span>
+                                <span class="count">({{template "fmtPercentage" .HashRateChange}} in 24h)</span>
                                 <span class="currencyName"></span>
                             </div>
                         </div>
@@ -146,7 +151,9 @@
             </div>
 
             <div class="col-lg-6 decBlockchainWrapper">
-                <h3 class="title font-weight-bold">Decred Blockchain</h3>
+                <a class="no-underline" href="/blocks">
+                    <h3 class="title font-weight-bold">Decred Blockchain</h3>
+                </a>
                 <div class="row">
                     {{with .Mempool}}
                     <div class="col-lg-4 col-md-6 decredblockWrap">

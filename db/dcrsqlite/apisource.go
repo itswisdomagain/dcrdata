@@ -774,6 +774,15 @@ func (db *wiredDB) GetSDiff(idx int) float64 {
 	return sdiff
 }
 
+func (db *wiredDB) GetDiff(idx int64) float64 {
+	sdiff, err := db.RetrieveDiff(idx)
+	if err != nil {
+		log.Errorf("Unable to retrieve difficulty: %v", err)
+		return -1
+	}
+	return sdiff
+}
+
 func (db *wiredDB) GetSDiffRange(idx0, idx1 int) []float64 {
 	sdiffs, err := db.RetrieveSDiffRange(int64(idx0), int64(idx1))
 	if err != nil {
@@ -1009,6 +1018,22 @@ func (db *wiredDB) GetExplorerBlocks(start int, end int) []*explorer.BlockBasic 
 		block := new(explorer.BlockBasic)
 		if data != nil {
 			block = makeExplorerBlockBasic(data)
+		}
+		summaries = append(summaries, block)
+	}
+	return summaries
+}
+
+func (db *wiredDB) GetExplorerFullBlocks(start int, end int) []*explorer.BlockInfo {
+	if start < end {
+		return nil
+	}
+	summaries := make([]*explorer.BlockInfo, 0, start-end)
+	for i := start; i > end; i-- {
+		data := db.GetBlockVerbose(i, true)
+		block := new(explorer.BlockInfo)
+		if data != nil {
+			block = db.GetExplorerBlock(data.Hash)
 		}
 		summaries = append(summaries, block)
 	}

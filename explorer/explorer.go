@@ -55,6 +55,8 @@ type explorerDataSourceLite interface {
 	TxHeight(txid string) (height int64)
 	BlockSubsidy(height int64, voters uint16) *dcrjson.GetBlockSubsidyResult
 	GetSqliteChartsData() (map[string]*dbtypes.ChartsData, error)
+	GetExplorerFullBlocks(start int, end int) []*BlockInfo
+	GetDiff(idx int64) float64
 }
 
 // explorerDataSource implements extra data retrieval functions that require a
@@ -323,10 +325,19 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	}
 	exp.NewBlockData = newBlockData
 	bdHeight := newBlockData.Height
+	difficulty := blockData.Header.Difficulty
 
 	stakePerc := blockData.PoolInfo.Value / dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
 
 	// Update all ExtraInfo with latest data
+	targetTimePerBlock := float64(exp.ChainParams.TargetTimePerBlock)
+	exp.ExtraInfo.HashRate = dbtypes.CalculateHashRate(difficulty, targetTimePerBlock)
+
+	// 248 blocks take almost a day to mine
+	last24hrDifficulty := exp.blockData.GetDiff(bdHeight - 248)
+	last24HrHashRate := dbtypes.CalculateHashRate(last24hrDifficulty, targetTimePerBlock)
+	exp.ExtraInfo.HashRateChange = 100 * (exp.ExtraInfo.HashRate - last24HrHashRate) / last24HrHashRate
+
 	exp.ExtraInfo.CoinSupply = blockData.ExtraInfo.CoinSupply
 	exp.ExtraInfo.StakeDiff = blockData.CurrentStakeDiff.CurrentStakeDifficulty
 	exp.ExtraInfo.NextExpectedStakeDiff = blockData.EstStakeDiff.Expected
@@ -334,7 +345,7 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	exp.ExtraInfo.NextExpectedBoundsMax = blockData.EstStakeDiff.Max
 	exp.ExtraInfo.IdxBlockInWindow = blockData.IdxBlockInWindow
 	exp.ExtraInfo.IdxInRewardWindow = int(bdHeight % exp.ChainParams.SubsidyReductionInterval)
-	exp.ExtraInfo.Difficulty = blockData.Header.Difficulty
+	exp.ExtraInfo.Difficulty = difficulty
 	exp.ExtraInfo.NBlockSubsidy.Dev = blockData.ExtraInfo.NextBlockSubsidy.Developer
 	exp.ExtraInfo.NBlockSubsidy.PoS = blockData.ExtraInfo.NextBlockSubsidy.PoS
 	exp.ExtraInfo.NBlockSubsidy.PoW = blockData.ExtraInfo.NextBlockSubsidy.PoW

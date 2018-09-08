@@ -106,7 +106,7 @@ func (exp *explorerUI) SideChains(w http.ResponseWriter, r *http.Request) {
 func (exp *explorerUI) NextHome(w http.ResponseWriter, r *http.Request) {
 	height := exp.blockData.GetHeight()
 
-	blocks := exp.blockData.GetExplorerBlocks(height, height-11)
+	blocks := exp.blockData.GetExplorerFullBlocks(height, height-11)
 
 	exp.NewBlockDataMtx.Lock()
 	exp.MempoolData.RLock()
@@ -114,7 +114,7 @@ func (exp *explorerUI) NextHome(w http.ResponseWriter, r *http.Request) {
 	str, err := exp.templates.execTemplateToString("nexthome", struct {
 		Info    *HomeInfo
 		Mempool *MempoolInfo
-		Blocks  []*BlockBasic
+		Blocks  []*BlockInfo
 		Version string
 		NetName string
 	}{
