@@ -651,14 +651,14 @@ func (db *DB) RetrieveBlockSummaryByTimeRange(minTime, maxTime int64, limit int)
 	return blocks, nil
 }
 
-// RetrieveDiff returns the difficulty for block ind
+// RetrieveDiff returns the difficulty for block ind at the specified chain height.
 func (db *DB) RetrieveDiff(ind int64) (float64, error) {
 	var sdiff, diff float64
 	err := db.QueryRow(db.getSDiffSQL, ind).Scan(&sdiff, &diff)
 	return diff, err
 }
 
-// RetrieveSDiff returns the stake difficulty for block ind
+// RetrieveSDiff returns the stake difficulty for block ind at the specified chain height.
 func (db *DB) RetrieveSDiff(ind int64) (float64, error) {
 	var sdiff, diff float64
 	err := db.QueryRow(db.getSDiffSQL, ind).Scan(&sdiff, &diff)

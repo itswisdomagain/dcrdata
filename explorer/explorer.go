@@ -56,7 +56,7 @@ type explorerDataSourceLite interface {
 	BlockSubsidy(height int64, voters uint16) *dcrjson.GetBlockSubsidyResult
 	GetSqliteChartsData() (map[string]*dbtypes.ChartsData, error)
 	GetExplorerFullBlocks(start int, end int) []*BlockInfo
-	GetDiff(idx int64) float64
+	DifficultyAtHeight(idx int64) float64
 }
 
 // explorerDataSource implements extra data retrieval functions that require a
@@ -299,7 +299,7 @@ func (exp *explorerUI) prePopulateChartsData() {
 	log.Info("Done Pre-populating the charts data")
 }
 
-func (exp *explorerUI) Store(blockData *blockdata.BlockData, val *wire.MsgBlock) error {
+func (exp *explorerUI) Store(blockData *blockdata.BlockData, msgBlock *wire.MsgBlock) error {
 	bData := blockData.ToBlockExplorerSummary()
 
 	// Update the charts data after every five blocks or if no charts data
@@ -308,23 +308,23 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, val *wire.MsgBlock)
 		go exp.prePopulateChartsData()
 	}
 
+	// Returns the Block with some more data needed for the full block visualization.
+	newBlockData := exp.blockData.GetExplorerBlock(msgBlock.BlockHash().String())
+	targetTimePerBlock := float64(exp.ChainParams.TargetTimePerBlock)
+	difficulty := blockData.Header.Difficulty
+	bdHeight := newBlockData.Height
+
+	// 248 blocks take almost a day to mine
+	last24hrDifficulty := exp.blockData.DifficultyAtHeight(bdHeight - 248)
+	last24HrHashRate := dbtypes.CalculateHashRate(last24hrDifficulty, targetTimePerBlock)
+	stakePerc := blockData.PoolInfo.Value / dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
+
 	// Lock for explorerUI's NewBlockData and ExtraInfo
 	exp.NewBlockDataMtx.Lock()
 
-	// Returns the Block with some more data needed for the full block visualization.
-	exp.NewBlockData = exp.blockData.GetExplorerBlock(val.BlockHash().String())
-	bdHeight := exp.NewBlockData.Height
-	difficulty := blockData.Header.Difficulty
-
-	stakePerc := blockData.PoolInfo.Value / dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
-
 	// Update all ExtraInfo with latest data
-	targetTimePerBlock := float64(exp.ChainParams.TargetTimePerBlock)
+	exp.NewBlockData = newBlockData
 	exp.ExtraInfo.HashRate = dbtypes.CalculateHashRate(difficulty, targetTimePerBlock)
-
-	// 248 blocks take almost a day to mine
-	last24hrDifficulty := exp.blockData.GetDiff(bdHeight - 248)
-	last24HrHashRate := dbtypes.CalculateHashRate(last24hrDifficulty, targetTimePerBlock)
 	exp.ExtraInfo.HashRateChange = 100 * (exp.ExtraInfo.HashRate - last24HrHashRate) / last24HrHashRate
 
 	exp.ExtraInfo.CoinSupply = blockData.ExtraInfo.CoinSupply

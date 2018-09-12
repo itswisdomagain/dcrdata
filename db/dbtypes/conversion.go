@@ -86,7 +86,7 @@ func ChartGroupingToInterval(grouping ChartGrouping) (float64, error) {
 }
 
 // CalculateHashRate calculates the block chain from the difficulty value and
-// the targetTimePerBlock in seconds. The hashrate return is in form PentaHash
+// the targetTimePerBlock in seconds. The hashrate return is in form PetaHash
 // per second (PH/s).
 func CalculateHashRate(difficulty, targetTimePerBlock float64) float64 {
 	return ((difficulty * math.Pow(2, 32)) / targetTimePerBlock) / 1000000

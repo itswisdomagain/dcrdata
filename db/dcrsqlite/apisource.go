@@ -774,7 +774,8 @@ func (db *wiredDB) GetSDiff(idx int) float64 {
 	return sdiff
 }
 
-func (db *wiredDB) GetDiff(idx int64) float64 {
+// DifficultyAtHeight fetches the difficulty value at the provided height.
+func (db *wiredDB) DifficultyAtHeight(idx int64) float64 {
 	sdiff, err := db.RetrieveDiff(idx)
 	if err != nil {
 		log.Errorf("Unable to retrieve difficulty: %v", err)
@@ -1068,7 +1069,7 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 		PreviousHash:          data.PreviousHash,
 		NextHash:              data.NextHash,
 		StakeValidationHeight: db.params.StakeValidationHeight,
-		AllTxs:                (uint8(b.Voters) + uint8(b.Transactions) + b.FreshStake),
+		AllTxs:                (uint32(b.Voters) + uint32(b.Transactions) + uint32(b.FreshStake)),
 	}
 
 	votes := make([]*explorer.TxBasic, 0, block.Voters)

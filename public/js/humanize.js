@@ -11,7 +11,7 @@ var humanize = (function() {
     fmtPercentage: function(val) {
       var sign = "+"
       var color = "green"
-      if (val < 0 ){
+      if (val < 1 ){
         sign = ""
         color = "red"
       }

@@ -204,7 +204,7 @@ type BlockInfo struct {
 	TotalSent             float64
 	MiningFee             dcrutil.Amount
 	StakeValidationHeight int64
-	AllTxs                uint8
+	AllTxs                uint32
 }
 
 // AddressTransactions collects the transactions for an address as AddressTx

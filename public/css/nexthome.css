@@ -452,7 +452,10 @@ footer {
 .blockRewardsWrapper,
 .proofofstakeWrapper {
   padding-right: 50px; }
-
+.info-block .expanded-block .row .col-12 img {
+    margin-right: 3%;
+    margin-top: 2%;
+    height: 20px; }
 @media (min-width: 1400px) {
   .container {
     max-width: 1280px !important; } }
