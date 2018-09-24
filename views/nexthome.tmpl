@@ -2,6 +2,64 @@
 <!DOCTYPE html>
 <html lang="en">
 {{ template "html-head" "Decred Block Explorer by dcrdata.org"}}
+<style>
+    a.holder {
+        display: block;
+    }
+
+    .mempool.block.row {
+        margin-bottom: 20px;
+    }
+
+    .block.row {
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+
+    .fixed-height-content-holder {
+      height: 16px;
+        overflow: hidden;
+    }
+
+    .fixed-height-content-holder > div {
+      display: inline-block;
+      height: 16px;
+    }
+
+    .fixed-height-content-holder > div:before {
+        content: ''
+    }
+
+    .regular-tx {
+      background-color: #b6b6b6;
+    }
+
+    .ticket, .revocation {
+        width: 2.5%;
+        margin: 0;
+    }
+    .ticket {
+        background-color: #6ddb6d;
+    }
+
+    .vote {
+        width: calc(10% - 3px);
+        margin: 0;
+    }
+    .vote.valid {
+        background-color: #6d92db;
+    }
+    .vote.invalid {
+        background-color: #b62424;
+    }
+
+    .revocation {
+        background-color: #feb603;
+    }
+    .revocation:first-child {
+        margin-left: 10px;
+    }
+</style>
 <body>
     {{ template "navbar" . }}
     <div id="mainContainer" class="container" data-controller="main">
@@ -130,99 +188,68 @@
                 <a class="no-underline" href="/blocks">
                     <h3 class="title font-weight-bold">Decred Blockchain</h3>
                 </a>
-                <div class="row">
-                    {{with .Mempool}}
-                    <div id="mempool-info" class="col-lg-4 col-md-6 decredblockWrap">
-                        <div class="decredblock">
-                            <div class="palette one" style="width:10%; left:0%;"></div>
-                            <div class="palette two" style="width:20%; left:10%;"></div>
-                            <div class="palette three" style="width:30%; left:30%;"></div>
-                            <div class="palette four" style="width:20%; left:60%;"></div>
-                            <div class="palette five" style="width:20%; left:80%;"></div>
-                            <div class="info-block">
-                                <span class="color-code">Mempool</span>
-                                <div class="expanded-block">
-                                    <div class="row">
-                                        <div class="col-12" style="margin-left:6%;">
-                                            <img src="/images/amount.png" alt="amount" style="margin-right:3%;">
-                                            <div class="data mono lh1rem fs14-decimal fs24">
-                                                <span id="mempool-total-sent">
-                                                    {{template "decimalParts" (float64AsDecimalParts .TotalOut 2 false 2)}}
-                                                </span>
-                                                <span class="pl-1 unit lh15rem"> DCR</span>
-                                            </div>
-                                            <div id="mempool-tx-count" class="subdata">sent in {{.NumAll}} transactions</div>
-                                        </div>
-                                        <div class="col-5" style="margin-left:6%;">
-                                            <img src="/images/votes.png" alt="votes" style="margin: 10% 10%;">
-                                            <div class="data">
-                                                <p id="mempool-votes" class="count">{{.NumVotes}}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <img src="/images/staking.png" alt="tickets" style="margin: 10% 10%;">
-                                            <div class="data">
-                                                <p id="mempool-tickets" class="count">{{.NumTickets}}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <button><a class="no-underline" href="/mempool">Show Mempool</a></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                
+                {{with .Mempool}}
+                <a class="no-underline holder" href="/mempool">
+                    <div class="mempool block row">
+                        <div class="col-sm-4 fixed-height-content-holder">
+                            <div class="regular-tx" data-value="{{.NumRegular}} transactions" style="width: {{percentage (int64 .NumRegular) (int64 10)}}%"></div>
                         </div>
-                    </div>
-                    {{end}}
+                        <div class="col-sm-4 fixed-height-content-holder" data-size="{{len .Tickets}} tickets">
+                            {{ range .Tickets}}
+                            <div class="ticket"></div>
+                            {{end}}
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="fixed-height-content-holder" data-size="{{len .Votes}} votes">
+                                {{ range .Votes}}
+                                <div class="vote {{if .VoteInfo.Validation.Validity}}valid{{else}}invalid{{end}}"></div>
+                                {{end}}
+                            </div>
 
-                    {{range .Blocks}}
-                    <div class="block-info col-lg-4 col-md-6 decredblockWrap">
-                        <div class="decredblock">
-                            <div class="palette one" style="width:10%; left:0%;"></div>
-                            <div class="palette two" style="width:20%; left:10%;"></div>
-                            <div class="palette three" style="width:30%; left:30%;"></div>
-                            <div class="palette four" style="width:20%; left:60%;"></div>
-                            <div class="palette five" style="width:20%; left:80%;"></div>
-                            <div class="info-block">
-                                <span id="block-height" class="color-code">{{.Height}}</span>
-                                <span class="row timespan" style="right:1.5rem;">
-                                    <span id="block-age" data-target="main.age" data-age="{{.BlockTime}}"></span>
-                                    <span style="margin-left:.2rem;">ago</span>
-                                </span>
-                                <div class="expanded-block">
-                                    <div class="row">
-                                        <div class="col-12" style="margin-left:6%;">
-                                            <img src="/images/amount.png" alt="amount">
-                                            <div class="data mono lh1rem fs14-decimal fs24">
-                                                <span id="total-sent">
-                                                    {{template "decimalParts" (float64AsDecimalParts .TotalSent 2 false 2)}}
-                                                </span>
-                                                <span class="pl-1 unit lh15rem"> DCR</span>
-                                            </div>
-                                            <div id="tx-count" class="subdata">sent in {{.AllTxs}} transactions</div>
-                                        </div>
-                                        <div class="col-5" style="margin-left:6%;">
-                                            <img src="/images/votes.png" alt="votes" style="margin: 10% 10%;">
-                                            <div class="data">
-                                                <p id="votes" class="count">{{.Voters}}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <img src="/images/staking.png" alt="tickets" style="margin: 10% 10%;">
-                                            <div class="data">
-                                                <p id="tickets" class="count">{{.FreshStake}}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                           <button><a id="show-block" class="text-center no-underline" href="/block/{{.Height}}">Show Block</a></button>
-                                        </div>
-                                    </div>
-                                </div>
+                            {{if gt .NumRevokes 0}}
+                            <div class="fixed-height-content-holder" data-size="{{len .Revocations}} revocations">
+                                {{ range .Revocations}}
+                                <div class="revocation"></div>
+                                {{end}}
                             </div>
+                            {{end}}
                         </div>
                     </div>
-                    {{end}}
-  		        </div>
+                </a>
+                {{end}}
+
+                {{range .Blocks}}
+                <a class="no-underline holder" href="/block/{{.Height}}">
+                    <div class="block row">
+                        <div class="col-sm-4 fixed-height-content-holder">
+                            <div class="regular-tx" data-value="{{.Transactions}} transactions" style="width: {{percentage (int64 .Transactions) (int64 10)}}%"></div>
+                        </div>
+                        <div class="col-sm-4 fixed-height-content-holder" data-size="{{len .Tickets}} tickets">
+                            {{ range .Tickets}}
+                            <div class="ticket"></div>
+                            {{end}}
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="fixed-height-content-holder" data-size="{{len .Votes}} votes">
+                                {{ range .Votes}}
+                                <div class="vote {{if .VoteInfo.Validation.Validity}}valid{{else}}invalid{{end}}"></div>
+                                {{end}}
+                            </div>
+
+                            {{if .Revocations}}
+                            <div class="fixed-height-content-holder" data-size="{{len .Revocations}} revocations">
+                                {{ range .Revs}}
+                                <div class="revocation"></div>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </div>
+                    </div>
+                </a>
+                {{end}}
+
+                <br>
                 <a class="no-underline" href="/blocks"><div class="showmore"><p>View BlockChain History</p></div></a>
             </div>
         </div>
