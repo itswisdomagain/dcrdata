@@ -5,6 +5,46 @@
 
       <script src="/js/jquery.js"></script>
       <script>
+        function cleanUp() {
+            $('.block-votes').each(function() {
+                var blockVotes = $(this);
+                var votes = blockVotes.attr('data-value');
+                for (var i = 0; i < 5 - votes; i++) {
+                    blockVotes.append('<span></span>');
+                }
+            })
+
+            $('.block-tickets').each(function() {
+                var blockTicketsAndRevs = $(this);
+                var count = blockTicketsAndRevs.children().length;
+                for (var i = 0; i < 20 - count; i++) {
+                    blockTicketsAndRevs.append('<span></span>');
+                }
+            })
+
+            $('.block-ticket').each(function() {
+                var blockTicket = $(this);
+                var opacity = (blockTicket.attr('data-input') + blockTicket.attr('data-output')) / 10;
+                blockTicket.css('opacity', opacity);
+            })
+
+            $('.block-rev').each(function() {
+                var blockRev = $(this);
+                var opacity = (blockRev.attr('data-input') + blockRev.attr('data-output')) / 10;
+                blockRev.css('opacity', opacity);
+            })
+
+            $('.block-tx').each(function() {
+                var blockTx = $(this);
+                var opacity = (blockTx.attr('data-input') + blockTx.attr('data-output')) / 10;
+                blockTx.css('opacity', opacity);
+
+                var amount = blockTx.attr('data-size');
+                blockTx.css('flex-grow', amount);
+            })
+        }
+      </script>
+      <script>
       // For dyanamic transactions, tickets, votes, revoke bar display
 
         var ticketbar = "<span class='bar-ticket'>&nbsp;</span>";
@@ -196,13 +236,8 @@
                 </a>
                 <div class="row">
                     {{with .Mempool}}
-                    <div id="mempool-info" class="col-lg-4 col-md-6 decredblockWrap">
+                    <div id="mempool-info" class="col-lg-6 col-md-4 col-sm-6 decredblockWrap">
                         <div class="decredblock">
-                            <div class="palette one" style="width:10%; left:0%;"></div>
-                            <div class="palette two" style="width:20%; left:10%;"></div>
-                            <div class="palette three" style="width:30%; left:30%;"></div>
-                            <div class="palette four" style="width:20%; left:60%;"></div>
-                            <div class="palette five" style="width:20%; left:80%;"></div>
                             <div class="info-block">
                                 <span class="color-code">Mempool</span>
                                 <div class="expanded-block">
@@ -235,51 +270,39 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="block-rows">
+                                <div class="block-rewards">
+                                    <span class="pow"></span>
+                                    <span class="pos"></span>
+                                    <span class="fund"></span>
+                                    <span class="fees"></span>
+                                </div>
+                                <div class="block-votes">
+                                </div>
+                                <div class="block-tickets">
+                                    {{range .Tickets}}
+                                    <span class="block-ticket" data-size="{{.TotalOut}}"></span>
+                                    {{end}}
+                                    {{range .Revocations}}
+                                    <span class="block-rev" data-size="{{.TotalOut}}"></span>
+                                    {{end}}
+                                </div>
+                                <div class="block-transactions">
+                                    {{range .Transactions}}
+                                    <span class="block-tx" data-size="{{.TotalOut}}"></span>
+                                    {{end}}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {{end}}
 
                     {{range .Blocks}}
-                    <div class="block-info col-lg-4 col-md-6 decredblockWrap">
+                    <div class="block-info col-lg-6 col-md-4 col-sm-6 decredblockWrap">
                         <div class="decredblock">
-                            <div style="position:relative;z-index:33;">
-                                <div>
-                                  <div class="box-1" class="boxes">
-                                    <span id="transactions-area-{{.Height}}"></span>
-                                  </div>
-
-                                  <div class="box-2" class="boxes">
-                                    <span id="tickets-area-{{.Height}}"></span>
-                                  </div>
-
-                                  <div class="box-3" class="boxes">
-                                    <span id="votes-area-{{.Height}}"></span>
-                                  </div>
-
-                                  <div class="box-4" class="boxes">
-                                    <span id="revoke-area-{{.Height}}"></span>
-                                  </div>
-                                </div>
-
-                                <script>
-                                // For dyanamic transactions, tickets, votes, revoke bar display
-                                  $(function() {
-                                      renderTransactionsBar({{.AllTxs}},{{.Height}});
-                                      renderTickets({{.FreshStake}},{{.Height}});
-                                      renderVotes({{.Voters}},{{.Height}});
-                                      renderRevocations({{.Revocations}},{{.Height}});
-                                  });
-                                </script>
-
-                            </div>
-                            <div class="palette one" style="width:10%; left:0%;"></div>
-                            <div class="palette two" style="width:20%; left:10%;"></div>
-                            <div class="palette three" style="width:30%; left:30%;"></div>
-                            <div class="palette four" style="width:20%; left:60%;"></div>
-                            <div class="palette five" style="width:20%; left:80%;"></div>
                             <div class="info-block">
                                 <span id="block-height" class="color-code">{{.Height}}</span>
-                                <span class="row timespan" style="right:1.5rem;">
+                                <span class="timespan">
                                     <span id="block-age" data-target="main.age" data-age="{{.BlockTime}}"></span>
                                     <span style="margin-left:.2rem;"> ago</span>
                                 </span>
@@ -313,9 +336,37 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="block-rows">
+                                <div class="block-rewards">
+                                    <span class="pow"></span>
+                                    <span class="pos"></span>
+                                    <span class="fund"></span>
+                                    <span class="fees"></span>
+                                </div>
+                                <div class="block-votes">
+                                    {{range .Votes}}
+                                    <span style="background-color: {{if .VoteInfo.Validation.Validity}}#6D92DB{{else}}#FF0000{{end}}"></span>
+                                    {{end}}
+                                </div>
+                                <div class="block-tickets">
+                                    {{range .Tickets}}
+                                    <span class="block-ticket" data-size="{{.Total}}"></span>
+                                    {{end}}
+                                    {{range .Revs}}
+                                    <span class="block-rev" data-size="{{.Total}}"></span>
+                                    {{end}}
+                                </div>
+                                <div class="block-transactions">
+                                    {{range .Tx}}
+                                    <span class="block-tx" data-size="{{.Total}}"></span>
+                                    {{end}}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {{end}}
+                    <script>cleanUp();</script>
   		        </div>
                 <a class="no-underline" href="/blocks"><div class="showmore"><p>View BlockChain History</p></div></a>
             </div>
