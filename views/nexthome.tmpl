@@ -240,35 +240,6 @@
                         <div class="decredblock">
                             <div class="info-block">
                                 <span class="color-code">Mempool</span>
-                                <div class="expanded-block">
-                                    <div class="row">
-                                        <div class="col-12" style="margin-left:6%;">
-                                            <img src="/images/amount.png" alt="amount" style="margin-right:3%;">
-                                            <div class="data mono lh1rem fs14-decimal fs24">
-                                                <span id="mempool-total-sent">
-                                                    {{template "decimalParts" (float64AsDecimalParts .TotalOut 2 false 2)}}
-                                                </span>
-                                                <span class="pl-1 unit lh15rem"> DCR</span>
-                                            </div>
-                                            <div id="mempool-tx-count" class="subdata">sent in {{.NumAll}} transactions</div>
-                                        </div>
-                                        <div class="col-5" style="margin-left:6%;">
-                                            <img src="/images/votes.png" alt="votes" style="margin: 10% 10%;">
-                                            <div class="data">
-                                                <p id="mempool-votes" class="count">{{.NumVotes}}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <img src="/images/staking.png" alt="tickets" style="margin: 10% 10%;">
-                                            <div class="data">
-                                                <p id="mempool-tickets" class="count">{{.NumTickets}}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <button><a class="no-underline" href="/mempool">Show Mempool</a></button>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                             <div class="block-rows">
                                 <div class="block-rewards">
@@ -293,6 +264,35 @@
                                     {{end}}
                                 </div>
                             </div>
+                            <div class="expanded-block">
+                                <div class="row">
+                                    <div class="col-12" style="margin-left:6%;">
+                                        <img src="/images/amount.png" alt="amount" style="margin-right:3%;">
+                                        <div class="data mono lh1rem fs14-decimal fs24">
+                                            <span id="mempool-total-sent">
+                                                {{template "decimalParts" (float64AsDecimalParts .TotalOut 2 false 2)}}
+                                            </span>
+                                            <span class="pl-1 unit lh15rem"> DCR</span>
+                                        </div>
+                                        <div id="mempool-tx-count" class="subdata">sent in {{.NumAll}} transactions</div>
+                                    </div>
+                                    <div class="col-5" style="margin-left:6%;">
+                                        <img src="/images/votes.png" alt="votes" style="margin: 10% 10%;">
+                                        <div class="data">
+                                            <p id="mempool-votes" class="count">{{.NumVotes}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <img src="/images/staking.png" alt="tickets" style="margin: 10% 10%;">
+                                        <div class="data">
+                                            <p id="mempool-tickets" class="count">{{.NumTickets}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button><a class="no-underline" href="/mempool">Show Mempool</a></button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {{end}}
@@ -306,37 +306,7 @@
                                     <span id="block-age" data-target="main.age" data-age="{{.BlockTime}}"></span>
                                     <span style="margin-left:.2rem;"> ago</span>
                                 </span>
-                                <div class="expanded-block">
-                                    <div class="row">
-                                        <div class="col-12" style="margin-left:6%;">
-                                            <img src="/images/amount.png" alt="amount">
-                                            <div class="data mono lh1rem fs14-decimal fs24">
-                                                <span id="total-sent">
-                                                    {{template "decimalParts" (float64AsDecimalParts .TotalSent 2 false 2)}}
-                                                </span>
-                                                <span class="pl-1 unit lh15rem"> DCR</span>
-                                            </div>
-                                            <div id="tx-count" class="subdata">sent in {{.AllTxs}} transactions</div>
-                                        </div>
-                                        <div class="col-5" style="margin-left:6%;">
-                                            <img src="/images/votes.png" alt="votes" style="margin: 10% 10%;">
-                                            <div class="data">
-                                                <p id="votes" class="count">{{.Voters}}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <img src="/images/staking.png" alt="tickets" style="margin: 10% 10%;">
-                                            <div class="data">
-                                                <p id="tickets" class="count">{{.FreshStake}}</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                           <button><a id="show-block" class="text-center no-underline" href="/block/{{.Height}}">Show Block</a></button>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-
                             <div class="block-rows">
                                 <div class="block-rewards">
                                     <span class="pow"></span>
@@ -363,6 +333,40 @@
                                     {{end}}
                                 </div>
                             </div>
+                            <div class="expanded-block">
+                                <div class="info-block">
+                                    <span id="block-height" class="color-code">{{.Height}}</span>
+                                    <span class="timespan">
+                                        <span id="block-age" data-target="main.age" data-age="{{.BlockTime}}"></span>
+                                        <span style="margin-left:.2rem;"> ago</span>
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <img src="/images/amount.png" alt="amount" style="vertical-align: top; margin: 0 .1em 0 10%;">
+                                    <div style="display: inline-block;">
+                                        <div class="data mono lh1rem fs14-decimal fs24">
+                                            <span id="total-sent">
+                                                {{template "decimalParts" (float64AsDecimalParts .TotalSent 2 false 2)}}
+                                            </span>
+                                            <span class="pl-1 unit lh15rem"> DCR</span>
+                                        </div>
+                                        <div id="tx-count" class="subdata">sent in {{.AllTxs}} transactions</div>
+                                    </div>
+                                </div>
+
+                                <img src="/images/votes.png" alt="votes" style="margin: 0 .1em 0 10%;">
+                                <div class="data">
+                                    <p id="votes" class="count">{{.Voters}}</p>
+                                </div>
+
+                                <img src="/images/staking.png" alt="tickets" style="margin: 0 .1em 0 5em;">
+                                <div class="data">
+                                    <p id="tickets" class="count">{{.FreshStake}}</p>
+                                </div>
+
+                                <button><a id="show-block" class="text-center no-underline" href="/block/{{.Height}}">Show Block</a></button>
+                            </div>
                         </div>
                     </div>
                     {{end}}
@@ -374,26 +378,20 @@
     </div>
 
     <script>
-        $(document).ready(function(){
-            var count = 0;
-            $(".decBlockchainWrapper .decredblockWrap").click(function(){
-                $(this).toggleClass("expanded");
-                count++;
+        $(".decBlockchainWrapper .decredblockWrap").click(function() {
+            clearSelection();
 
-                if (count > 1) {
-                    $(".decBlockchainWrapper .decredblockWrap").removeClass("expanded");
-                    count = 0;
-                }
-            });
+            var expandedBlock = $(this).find('.expanded-block');
+            if (expandedBlock.css('display') == 'none') {
+                expandedBlock.fadeIn();
+                $(this).siblings().addClass("fade");
+            }
+        });
 
-            $(".decredblockWrap").click(function() {
-                if ($( ".decredblockWrap" ).hasClass( "expanded" )) {
-                    $( ".decredblockWrap" ).siblings().addClass("fade");
-                } else {
-                    $( ".decredblockWrap" ).siblings().removeClass("fade");
-                }
-            });
-        })
+        function clearSelection() {
+            $('.expanded-block').fadeOut();
+            $('.fade').removeClass("fade");
+        }
     </script>
 
     {{ template "footer" . }}
