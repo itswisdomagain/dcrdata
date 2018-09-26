@@ -2,109 +2,86 @@
 <!DOCTYPE html>
 <html lang="en">
 {{ template "html-head" "Decred Block Explorer by dcrdata.org"}}
+    <link rel="stylesheet" type="text/css" href="/css/tooltipster.bundle.min.css" />
+    <style>
+    .tooltipster-sidetip .tooltipster-content {
+        padding: 3px 8px;
+        font-size: 13px;
+    }
+    .tooltipster-sidetip .tooltipster-box, .tooltipster-sidetip .tooltipster-arrow-border {
+        border: none;
+    }
+    </style>
 
-      <script src="/js/jquery.js"></script>
-      <script>
-        function cleanUp() {
-            $('.block-votes').each(function() {
-                var blockVotes = $(this);
-                var votes = blockVotes.attr('data-value');
-                for (var i = 0; i < 5 - votes; i++) {
-                    blockVotes.append('<span></span>');
-                }
-            })
+    <script type="text/javascript" src="/js/tooltipster.bundle.min.js"></script>
+    <script>
+    function resizeRowsInEachBlock() {
+        // get total amount in each row and use as flex-grow value
+        $('.block-rows > *').each(function(){
+            var row = $(this);
+            if (row.hasClass('block-rewards')) {
+                var totalAmountInRow = +(row.find('.pow').attr('data-value'));
+                totalAmountInRow += +(row.find('.fund').attr('data-value'));
+                totalAmountInRow += +(row.find('.fees').attr('data-value'));
+                row.css('flex-grow', totalAmountInRow);
+            }
+            else {
+                var totalAmountInRow = 0;
+                row.find('span').each(function(){
+                    totalAmountInRow += +$(this).attr('data-size');
+                })
+                row.css('flex-grow', totalAmountInRow);
+            }
+        })
 
-            $('.block-tickets').each(function() {
-                var blockTicketsAndRevs = $(this);
-                var count = blockTicketsAndRevs.children().length;
-                for (var i = 0; i < 20 - count; i++) {
-                    blockTicketsAndRevs.append('<span></span>');
-                }
-            })
+        // remove hidden spans from mempool votes row, as we've gotten the total we wanted
+        $('#mempool-info .block-votes').html('');
+    }
 
-            $('.block-ticket').each(function() {
-                var blockTicket = $(this);
-                var opacity = (blockTicket.attr('data-input') + blockTicket.attr('data-output')) / 10;
-                blockTicket.css('opacity', opacity);
-            })
+    function appendEmptyBlocksToEachRow() {
+        $('.block-votes').each(function() {
+            var blockVotes = $(this);
+            var votes = blockVotes.children().length;
+            for (var i = 0; i < 5 - votes; i++) {
+                blockVotes.append('<span></span>');
+            }
 
-            $('.block-rev').each(function() {
-                var blockRev = $(this);
-                var opacity = (blockRev.attr('data-input') + blockRev.attr('data-output')) / 10;
-                blockRev.css('opacity', opacity);
-            })
+            // paint percentage of pow and pos relative to vote count
+            blockVotes.parent().find('.block-rewards .paint').css('width', (votes * 100 / 5) + '%');
+        })
 
-            $('.block-tx').each(function() {
-                var blockTx = $(this);
-                var opacity = (blockTx.attr('data-input') + blockTx.attr('data-output')) / 10;
-                blockTx.css('opacity', opacity);
+        $('.block-tickets').each(function() {
+            var blockTicketsAndRevs = $(this);
+            var count = blockTicketsAndRevs.children().length;
+            for (var i = 0; i < 20 - count; i++) {
+                blockTicketsAndRevs.append('<span></span>');
+            }
+        })
+    }
 
-                var amount = blockTx.attr('data-size');
-                blockTx.css('flex-grow', amount);
-            })
-        }
-      </script>
-      <script>
-      // For dyanamic transactions, tickets, votes, revoke bar display
+    function applyOpacityBasedOnInputsOutputs() {
+        $('.block-ticket').each(function() {
+            var blockTicket = $(this);
+            var opacity = ((+blockTicket.attr('data-input')) + (+blockTicket.attr('data-output'))) / 10;
+            blockTicket.css('opacity', opacity);
+        })
 
-        var ticketbar = "<span class='bar-ticket'>&nbsp;</span>";
-        var votesbar = "<span class='bar-votes'>&nbsp;</span>";
-        var novotesbar = "<span class='no-bar-votes'>&nbsp;</span>";
-        var revokebar = "<span class='bar-revoke'>&nbsp;</span>";
-        var transactionsbar = "<span class='bar-transactions'>&nbsp;</span>";
-        var output = ""; // generic starting output for render area
+        $('.block-rev').each(function() {
+            var blockRev = $(this);
+            var opacity = ((+blockRev.attr('data-input')) + (+blockRev.attr('data-output'))) / 10;
+            blockRev.css('opacity', opacity);
+        })
 
-        /*
-        * Renders a single bar or more
-        * gets quantity of bars and height id.
-        * height is used for area of output
-        */
-        function renderTransactionsBar(quantity, height) {
-          output = "";
-          var i;
-          for (i = 0; i < quantity; i++) {
-            output += transactionsbar;
-            console.log("hit");
-          }
+        $('.block-tx').each(function() {
+            var blockTx = $(this);
+            var opacity = ((+blockTx.attr('data-input')) + (+blockTx.attr('data-output'))) / 10;
+            blockTx.css('opacity', opacity);
 
-          $("#transactions-area-"+height).html(output);
-        }
-
-        function renderTickets(quantity, height) {
-          output = "";
-          var i;
-          for (i = 0; i < quantity; i++) {
-            output += ticketbar;
-          }
-
-          $("#tickets-area-"+height).html(output);
-        }
-
-        function renderVotes(quantity,height) {
-          output = "";
-          var i;
-          for (i = 0; i < quantity; i++) {
-            output += votesbar;
-          }
-
-          if (quantity == 0) {
-            output = novotesbar;
-          }
-
-          $("#votes-area-"+height).html(output);
-        }
-
-        function renderRevocations(quantity, height) {
-          output = "";
-          var i;
-          for (i = 0; i < quantity; i++) {
-            output += revokebar;
-            console.log("hit");
-          }
-
-          $("#revoke-area-"+height).html(output);
-        }
-      </script>
+            var amount = blockTx.attr('data-size');
+            blockTx.css('flex-grow', amount);
+        })
+    }
+    </script>
 <body>
     {{ template "navbar" . }}
     <div id="mainContainer" class="container" data-controller="main">
@@ -231,81 +208,15 @@
 
             <div class="col-lg-6 decBlockchainWrapper">
                 <a class="no-underline" href="/blocks">
-                    <h3 class="title font-weight-bold">Decred Blockchain</h3><br />
-                    <a href="#">Switch view</a>
+                    <h3 class="title font-weight-bold">Decred Blockchain</h3>
                 </a>
+                <a href="#">Switch view</a>
                 <div class="row">
                     {{with .Mempool}}
                     <div id="mempool-info" class="col-lg-6 col-md-4 col-sm-6 decredblockWrap">
                         <div class="decredblock">
                             <div class="info-block">
-                                <span class="color-code">Mempool</span>
-                            </div>
-                            <div class="block-rows">
-                                <div class="block-rewards">
-                                    <span class="pow"></span>
-                                    <span class="pos"></span>
-                                    <span class="fund"></span>
-                                    <span class="fees"></span>
-                                </div>
-                                <div class="block-votes">
-                                </div>
-                                <div class="block-tickets">
-                                    {{range .Tickets}}
-                                    <span class="block-ticket" data-size="{{.TotalOut}}"></span>
-                                    {{end}}
-                                    {{range .Revocations}}
-                                    <span class="block-rev" data-size="{{.TotalOut}}"></span>
-                                    {{end}}
-                                </div>
-                                <div class="block-transactions">
-                                    {{range .Transactions}}
-                                    <span class="block-tx" data-size="{{.TotalOut}}"></span>
-                                    {{end}}
-                                </div>
-                            </div>
-                            <div class="expanded-block">
-                                <div class="row">
-                                    <div class="col-12" style="margin-left:6%;">
-                                        <img src="/images/amount.png" alt="amount" style="margin-right:3%;">
-                                        <div class="data mono lh1rem fs14-decimal fs24">
-                                            <span id="mempool-total-sent">
-                                                {{template "decimalParts" (float64AsDecimalParts .TotalOut 2 false 2)}}
-                                            </span>
-                                            <span class="pl-1 unit lh15rem"> DCR</span>
-                                        </div>
-                                        <div id="mempool-tx-count" class="subdata">sent in {{.NumAll}} transactions</div>
-                                    </div>
-                                    <div class="col-5" style="margin-left:6%;">
-                                        <img src="/images/votes.png" alt="votes" style="margin: 10% 10%;">
-                                        <div class="data">
-                                            <p id="mempool-votes" class="count">{{.NumVotes}}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <img src="/images/staking.png" alt="tickets" style="margin: 10% 10%;">
-                                        <div class="data">
-                                            <p id="mempool-tickets" class="count">{{.NumTickets}}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <button><a class="no-underline" href="/mempool">Show Mempool</a></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{end}}
-
-                    {{range .Blocks}}
-                    <div class="block-info col-lg-6 col-md-4 col-sm-6 decredblockWrap">
-                        <div class="decredblock">
-                            <div class="info-block">
-                                <span id="block-height" class="color-code">{{.Height}}</span>
-                                <span class="timespan">
-                                    <span id="block-age" data-target="main.age" data-age="{{.BlockTime}}"></span>
-                                    <span style="margin-left:.2rem;"> ago</span>
-                                </span>
+                                <a class="color-code" href="/mempool">Mempool</a>
                             </div>
                             <div class="block-rows">
                                 <div class="block-rewards">
@@ -316,83 +227,86 @@
                                 </div>
                                 <div class="block-votes">
                                     {{range .Votes}}
-                                    <span style="background-color: {{if .VoteInfo.Validation.Validity}}#6D92DB{{else}}#FF0000{{end}}"></span>
+                                    <span data-size="{{.TotalOut}}" style="display: none;"></span>
                                     {{end}}
                                 </div>
                                 <div class="block-tickets">
                                     {{range .Tickets}}
-                                    <span class="block-ticket" data-size="{{.Total}}"></span>
+                                    <span class="block-ticket" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}" title="Ticket ({{.Total}} DCR)"></span>
                                     {{end}}
-                                    {{range .Revs}}
-                                    <span class="block-rev" data-size="{{.Total}}"></span>
+                                    {{range .Revocations}}
+                                    <span class="block-rev" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}" title="Revocation ({{.Total}} DCR)"></span>
                                     {{end}}
                                 </div>
                                 <div class="block-transactions">
-                                    {{range .Tx}}
-                                    <span class="block-tx" data-size="{{.Total}}"></span>
+                                    {{range .Transactions}}
+                                    <span class="block-tx" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}" title="Regular Tx ({{.Total}} DCR)"></span>
                                     {{end}}
                                 </div>
-                            </div>
-                            <div class="expanded-block">
-                                <div class="info-block">
-                                    <span id="block-height" class="color-code">{{.Height}}</span>
-                                    <span class="timespan">
-                                        <span id="block-age" data-target="main.age" data-age="{{.BlockTime}}"></span>
-                                        <span style="margin-left:.2rem;"> ago</span>
-                                    </span>
-                                </div>
-
-                                <div>
-                                    <img src="/images/amount.png" alt="amount" style="vertical-align: top; margin: 0 .1em 0 10%;">
-                                    <div style="display: inline-block;">
-                                        <div class="data mono lh1rem fs14-decimal fs24">
-                                            <span id="total-sent">
-                                                {{template "decimalParts" (float64AsDecimalParts .TotalSent 2 false 2)}}
-                                            </span>
-                                            <span class="pl-1 unit lh15rem"> DCR</span>
-                                        </div>
-                                        <div id="tx-count" class="subdata">sent in {{.AllTxs}} transactions</div>
-                                    </div>
-                                </div>
-
-                                <img src="/images/votes.png" alt="votes" style="margin: 0 .1em 0 10%;">
-                                <div class="data">
-                                    <p id="votes" class="count">{{.Voters}}</p>
-                                </div>
-
-                                <img src="/images/staking.png" alt="tickets" style="margin: 0 .1em 0 5em;">
-                                <div class="data">
-                                    <p id="tickets" class="count">{{.FreshStake}}</p>
-                                </div>
-
-                                <button><a id="show-block" class="text-center no-underline" href="/block/{{.Height}}">Show Block</a></button>
                             </div>
                         </div>
                     </div>
                     {{end}}
-                    <script>cleanUp();</script>
+
+                    {{range .Blocks}}
+                    <div class="block-info col-lg-6 col-md-4 col-sm-6 decredblockWrap">
+                        <div class="decredblock">
+                            <div class="info-block">
+                                <a id="block-height" class="color-code" href="/block/{{.Height}}">{{.Height}}</a>
+                                <div class="mono d-flex" style="line-height: 1;">
+                                    {{template "decimalParts" (float64AsDecimalParts .TotalSent 8 false)}}
+                                    <span class="pl-1 unit">DCR</span>
+                                </div>
+                                <span class="timespan">
+                                    <span id="block-age" data-target="main.age" data-age="{{.BlockTime}}"></span>&nbsp;ago
+                                </span>
+                            </div>
+                            <div class="block-rows">
+                                <div class="block-rewards">
+                                    {{with .Subsidy}}
+                                    <span class="pow" data-value="{{toFloat64Amount .PoW}}" style="flex-grow: {{.PoW}}" title="PoW ({{toFloat64Amount .PoW}} DCR)">
+                                        <span class="paint"></span>
+                                    </span>
+                                    <span class="pos" data-value="{{toFloat64Amount .PoS}}" style="flex-grow: {{.PoS}}" title="PoS ({{toFloat64Amount .PoS}} DCR)">
+                                        <span class="paint"></span>
+                                    </span>
+                                    <span class="fund" data-value="{{toFloat64Amount .Developer}}" style="flex-grow: {{.Developer}}" title="Fund ({{toFloat64Amount .Developer}} DCR)"></span>
+                                    {{end}}
+                                    <span class="fees" data-value="{{.MiningFee}}" style="flex-grow: {{.MiningFee}}" title="Mining Fees ({{.MiningFee}} DCR)"></span>
+                                </div>
+                                <div class="block-votes">
+                                    {{range .Votes}}
+                                    <span data-size="{{.Total}}" title="Vote ({{.Total}} DCR)" style="background-color: {{if .VoteInfo.Validation.Validity}}#6D92DB{{else}}#FF0000{{end}}"></span>
+                                    {{end}}
+                                </div>
+                                <div class="block-tickets">
+                                    {{range .Tickets}}
+                                    <span class="block-ticket" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}" title="Ticket ({{.Total}} DCR)"></span>
+                                    {{end}}
+                                    {{range .Revs}}
+                                    <span class="block-rev" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}" title="Revocation ({{.Total}} DCR)"></span>
+                                    {{end}}
+                                </div>
+                                <div class="block-transactions">
+                                    {{range .Tx}}
+                                    <span class="block-tx" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}" title="Regular Tx ({{.Total}} DCR)"></span>
+                                    {{end}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                    <script>
+                        resizeRowsInEachBlock();
+                        appendEmptyBlocksToEachRow();
+                        applyOpacityBasedOnInputsOutputs();
+                        $('[title]').tooltipster();
+                    </script>
   		        </div>
                 <a class="no-underline" href="/blocks"><div class="showmore"><p>View BlockChain History</p></div></a>
             </div>
         </div>
     </div>
-
-    <script>
-        $(".decBlockchainWrapper .decredblockWrap").click(function() {
-            clearSelection();
-
-            var expandedBlock = $(this).find('.expanded-block');
-            if (expandedBlock.css('display') == 'none') {
-                expandedBlock.fadeIn();
-                $(this).siblings().addClass("fade");
-            }
-        });
-
-        function clearSelection() {
-            $('.expanded-block').fadeOut();
-            $('.fade').removeClass("fade");
-        }
-    </script>
 
     {{ template "footer" . }}
 </body>

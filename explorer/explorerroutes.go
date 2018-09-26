@@ -111,15 +111,48 @@ func (exp *explorerUI) NextHome(w http.ResponseWriter, r *http.Request) {
 	exp.NewBlockDataMtx.RLock()
 	exp.MempoolData.RLock()
 
+	txCount := len(exp.MempoolData.Transactions)
+	mempoolTxs := make([]*TxInfo, 0, txCount)
+	for _, tx := range exp.MempoolData.Transactions {
+		exptx := exp.blockData.GetExplorerTx(tx.Hash)
+		for _, vin := range exptx.Vin {
+			if vin.IsCoinBase() {
+				exptx.Fee, exptx.FeeRate = 0.0, 0.0
+			}
+		}
+		mempoolTxs = append(mempoolTxs, exptx)
+	}
+
+	ticketsCount := len(exp.MempoolData.Tickets)
+	mempoolTickets := make([]*TxInfo, 0, ticketsCount)
+	for _, tx := range exp.MempoolData.Tickets {
+		exptx := exp.blockData.GetExplorerTx(tx.Hash)
+		mempoolTickets = append(mempoolTickets, exptx)
+	}
+
+	revCount := len(exp.MempoolData.Revocations)
+	mempoolRevs := make([]*TxInfo, 0, revCount)
+	for _, tx := range exp.MempoolData.Revocations {
+		exptx := exp.blockData.GetExplorerTx(tx.Hash)
+		mempoolRevs = append(mempoolRevs, exptx)
+	}
+
+	mempoolData := MempoolData{
+		Transactions: mempoolTxs,
+		Tickets:      mempoolTickets,
+		Votes:        exp.MempoolData.Votes,
+		Revocations:  mempoolRevs,
+	}
+
 	str, err := exp.templates.execTemplateToString("nexthome", struct {
 		Info    *HomeInfo
-		Mempool *MempoolInfo
+		Mempool MempoolData
 		Blocks  []*BlockInfo
 		Version string
 		NetName string
 	}{
 		exp.ExtraInfo,
-		exp.MempoolData,
+		mempoolData,
 		blocks,
 		exp.Version,
 		exp.NetName,

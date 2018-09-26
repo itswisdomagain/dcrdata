@@ -185,10 +185,10 @@ type BlockInfo struct {
 	StakeRoot             string
 	MerkleRoot            string
 	TxAvailable           bool
-	Tx                    []*TxBasic
-	Tickets               []*TxBasic
-	Revs                  []*TxBasic
-	Votes                 []*TxBasic
+	Tx                    []*TxInfo
+	Tickets               []*TxInfo
+	Revs                  []*TxInfo
+	Votes                 []*TxInfo
 	Misses                []string
 	Nonce                 uint32
 	VoteBits              uint16
@@ -202,9 +202,10 @@ type BlockInfo struct {
 	PreviousHash          string
 	NextHash              string
 	TotalSent             float64
-	MiningFee             dcrutil.Amount
+	MiningFee             float64
 	StakeValidationHeight int64
 	AllTxs                uint32
+	Subsidy               *dcrjson.GetBlockSubsidyResult
 }
 
 // AddressTransactions collects the transactions for an address as AddressTx
@@ -332,6 +333,14 @@ type MempoolInfo struct {
 	Tickets      []MempoolTx `json:"tickets"`
 	Votes        []MempoolTx `json:"votes"`
 	Revocations  []MempoolTx `json:"revs"`
+}
+
+// MempoolData models data to update mempool info on the home page
+type MempoolData struct {
+	Transactions []*TxInfo
+	Tickets      []*TxInfo
+	Votes        []MempoolTx
+	Revocations  []*TxInfo
 }
 
 // TicketIndex is used to assign an index to a ticket hash.

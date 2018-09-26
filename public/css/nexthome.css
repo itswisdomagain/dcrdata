@@ -113,15 +113,19 @@
      background: white;
      overflow: hidden;
      transition: 0.2s ease-in-out;
-     cursor: pointer;
      border: 1px solid black;
      position: relative;
      overflow: visible;
 }
+.decBlockchainWrapper .decredblockWrap .decredblock .block-rows {
+    display: flex;
+    flex-direction: column;
+    height: 100px;
+}
  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * {
+    flex-basis: 15px;
+    width: 100%;
    display: flex;
-   height: 15px;
-   width: 100%;
    flex-wrap: nowrap;
    align-items: stretch;
    border-top: 1px solid black;
@@ -132,7 +136,31 @@
  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * > *:first-child {
    border-left: none;
  }
- .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > *,
+ .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > * {
+     position: relative;
+    flex-basis: 5px;
+    flex-grow: 1;
+  }
+  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .pow > .paint {
+    opacity: 0.4;
+  }
+  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .pos > .paint {
+    opacity: 0.6;
+  }
+  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > * > .paint {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-color: #6bdf6e;
+  }
+  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .fund {
+    background-color: #6bdf6e;
+    opacity: 0.8;
+  }
+  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .fees {
+      background-color: #06ff00;
+  }
  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-votes > *,
  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-tickets > *,
  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-transactions > * {
@@ -150,8 +178,9 @@
  }
  .decBlockchainWrapper .decredblockWrap .decredblock .info-block {
      width: 100%;
-     height: 35px;
-     padding: 0 .5em;
+     display: flex;
+    justify-content: space-between;
+     padding: .2em .5em;
      background: white;
      transition: 0.2s ease-in-out;
      overflow: hidden;
@@ -203,20 +232,17 @@
  .decBlockchainWrapper .decredblockWrap .decredblock .info-block img {
      float: left;
 }
- .decBlockchainWrapper .decredblockWrap .decredblock span.color-code {
+ .decBlockchainWrapper .decredblockWrap .decredblock a.color-code {
      font-family: "Source Sans Pro", sans-serif;
      font-size: 12px;
      color: #2970FF;
      font-weight: bold;
-     line-height: 35px;
 }
  .decBlockchainWrapper .decredblockWrap .decredblock span.timespan {
      font-family: "Source Sans Pro", sans-serif;
      font-size: 12px;
      color: #17173C;
-     line-height: 35px;
      font-weight: bold;
-     float: right;
 }
  .decBlockchainWrapper .decredblockWrap.expanded {
      opacity: 1 !important;
@@ -228,9 +254,6 @@
      left: 5%;
      right: 5%;
      z-index: 99;
-}
- .decBlockchainWrapper .decredblockWrap.expanded .decredblock .info-block {
-     height: 180px;
 }
  .networkStatsWrapper {
      padding: 60px 15px;
@@ -612,9 +635,14 @@
      margin-top: 2%;
      height: 20px;
 }
- @media (min-width: 1400px) {
+@media (min-width: 1400px) {
      .container {
          max-width: 1280px !important;
+    }
+}
+@media (min-width: 1600px) {
+     .container {
+         max-width: 90% !important;
     }
 }
  @media (min-width: 800px) {
