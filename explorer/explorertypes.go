@@ -339,7 +339,7 @@ type MempoolInfo struct {
 type MempoolData struct {
 	Transactions []*TxInfo
 	Tickets      []*TxInfo
-	Votes        []MempoolTx
+	Votes        []*TxInfo
 	Revocations  []*TxInfo
 }
 

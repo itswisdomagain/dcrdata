@@ -96,15 +96,23 @@
      background-color: #F4F6F6;
 }
  .decBlockchainWrapper {
-     padding: 60px 15px;
+    flex-grow: 1;
+    flex-basis: 300px;
 }
  .decBlockchainWrapper .title {
      font-family: "Source Sans Pro", sans-serif;
      font-size: 20px;
      margin-bottom: 30px;
 }
+.blocks-holder {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: -5px;
+}
 .decBlockchainWrapper .decredblockWrap {
- margin-bottom: 20px;
+ margin: 5px;
+ width: 300px;
 }
  .decBlockchainWrapper .decredblockWrap.fade {
      opacity: 0.5;
@@ -123,7 +131,8 @@
     height: 100px;
 }
  .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * {
-    flex-basis: 15px;
+    flex-basis: 5px;
+    flex-grow: 1;
     width: 100%;
    display: flex;
    flex-wrap: nowrap;
@@ -184,6 +193,7 @@
      background: white;
      transition: 0.2s ease-in-out;
      overflow: hidden;
+     font-size: 14px;
 }
  .decBlockchainWrapper .decredblockWrap .decredblock .expanded-block {
    display: none;
@@ -234,15 +244,13 @@
 }
  .decBlockchainWrapper .decredblockWrap .decredblock a.color-code {
      font-family: "Source Sans Pro", sans-serif;
-     font-size: 12px;
-     color: #2970FF;
-     font-weight: bold;
+     line-height: 1;
+     color: #6d92db;
 }
  .decBlockchainWrapper .decredblockWrap .decredblock span.timespan {
      font-family: "Source Sans Pro", sans-serif;
-     font-size: 12px;
-     color: #17173C;
-     font-weight: bold;
+     line-height: 1;
+     color: #505050;
 }
  .decBlockchainWrapper .decredblockWrap.expanded {
      opacity: 1 !important;
@@ -255,19 +263,15 @@
      right: 5%;
      z-index: 99;
 }
- .networkStatsWrapper {
-     padding: 60px 15px;
-}
  .networkStatsWrapper .title {
      font-family: "Source Sans Pro", sans-serif;
      font-size: 20px;
      margin-bottom: 30px;
 }
  .networkStatsWrapper .statCard {
-     height: 28.3%;
-     max-height: 200px;
+     width: 500px;
      background: white;
-     padding:15px 35px;
+     padding:15px 25px;
      font-family: "Source Sans Pro", sans-serif;
      border-radius: 4px;
      margin-bottom: 20px;
@@ -638,11 +642,6 @@
 @media (min-width: 1400px) {
      .container {
          max-width: 1280px !important;
-    }
-}
-@media (min-width: 1600px) {
-     .container {
-         max-width: 90% !important;
     }
 }
  @media (min-width: 800px) {

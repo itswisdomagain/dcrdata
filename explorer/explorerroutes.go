@@ -106,7 +106,7 @@ func (exp *explorerUI) SideChains(w http.ResponseWriter, r *http.Request) {
 func (exp *explorerUI) NextHome(w http.ResponseWriter, r *http.Request) {
 	height := exp.blockData.GetHeight()
 
-	blocks := exp.blockData.GetExplorerFullBlocks(height, height-11)
+	blocks := exp.blockData.GetExplorerFullBlocks(height, height-15)
 
 	exp.NewBlockDataMtx.RLock()
 	exp.MempoolData.RLock()
@@ -130,6 +130,14 @@ func (exp *explorerUI) NextHome(w http.ResponseWriter, r *http.Request) {
 		mempoolTickets = append(mempoolTickets, exptx)
 	}
 
+	mempoolVotes := make([]*TxInfo, 0)
+	for _, tx := range exp.MempoolData.Votes {
+		if tx.VoteInfo.ForLastBlock == true {
+			exptx := exp.blockData.GetExplorerTx(tx.Hash)
+			mempoolVotes = append(mempoolVotes, exptx)
+		}
+	}
+
 	revCount := len(exp.MempoolData.Revocations)
 	mempoolRevs := make([]*TxInfo, 0, revCount)
 	for _, tx := range exp.MempoolData.Revocations {
@@ -140,7 +148,7 @@ func (exp *explorerUI) NextHome(w http.ResponseWriter, r *http.Request) {
 	mempoolData := MempoolData{
 		Transactions: mempoolTxs,
 		Tickets:      mempoolTickets,
-		Votes:        exp.MempoolData.Votes,
+		Votes:        mempoolVotes,
 		Revocations:  mempoolRevs,
 	}
 
