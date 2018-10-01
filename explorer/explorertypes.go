@@ -90,6 +90,16 @@ func (a *AddressTx) IOID(txType ...string) string {
 	return fmt.Sprintf("%s:in[%d]", a.TxID, a.InOutID)
 }
 
+// For use with /nexthome
+type TrimmedTxInfo struct {
+	VinCount  int
+	VoutCount int
+	VoteValid bool
+	TxID      string
+	Total     float64
+	Coinbase  bool
+}
+
 // TxInfo models data needed for display on the tx page
 type TxInfo struct {
 	*TxBasic
@@ -175,6 +185,19 @@ type Vout struct {
 	Type            string
 	Spent           bool
 	OP_RETURN       string
+}
+
+// For use with /nexthome
+type TrimmedBlockInfo struct {
+	Time         int64
+	Height       int64
+	TotalSent    float64
+	MiningFee    float64
+	Subsidy      *dcrjson.GetBlockSubsidyResult
+	Votes        []*TrimmedTxInfo
+	Tickets      []*TrimmedTxInfo
+	Revocations  []*TrimmedTxInfo
+	Transactions []*TrimmedTxInfo
 }
 
 // BlockInfo models data for display on the block page
@@ -337,10 +360,11 @@ type MempoolInfo struct {
 
 // MempoolData models data to update mempool info on the home page
 type MempoolData struct {
-	Transactions []*TxInfo
-	Tickets      []*TxInfo
-	Votes        []*TxInfo
-	Revocations  []*TxInfo
+	Transactions []*TrimmedTxInfo
+	Tickets      []*TrimmedTxInfo
+	Votes        []*TrimmedTxInfo
+	Revocations  []*TrimmedTxInfo
+	Total        float64
 }
 
 // TicketIndex is used to assign an index to a ticket hash.

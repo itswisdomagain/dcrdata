@@ -2,172 +2,30 @@
 <!DOCTYPE html>
 <html lang="en">
 {{ template "html-head" "Decred Block Explorer by dcrdata.org"}}
-    <script src="https://unpkg.com/tippy.js@2.5.4/dist/tippy.all.min.js"></script>
-    <style>
-    .block-rows > div > span > a {
-        display: block;
-        width: 100%;
-        height: 100%;
-    }
-    .container {
-        max-width: 90% !important;
-    }
-    .flex-space {
-        flex: 0.1 0 10px;
-    }
-    .tippy-tooltip.light-theme {
-        color: #26323d;
-        box-shadow: 0 0 20px 4px rgba(154,161,177,.15), 0 4px 80px -8px rgba(36,40,47,.25), 0 4px 4px -2px rgba(91,94,105,.15);
-        background-color: #fff;
-    }
-    .tippy-popper[x-placement^=top] .tippy-arrow {
-        border-top-color: white;
-    }
-    </style>
-
-    <script type="text/javascript" src="/js/tooltipster.bundle.min.js"></script>
-    <script>
-    function figureNumberOfBlocksToDisplay() {
-        var blocksHolder = $('.blocks-holder')[0];
-        var perRow = Math.floor(blocksHolder.clientWidth / 310);
-        var totalInDisplay = $('.blocks-holder > .decredblockWrap').length;
-        
-        var maxRows = Math.floor(totalInDisplay / perRow);
-        var maxDisplay = maxRows * perRow;
-
-        if (totalInDisplay > maxDisplay) {
-            for (var i = totalInDisplay; i > maxDisplay; i--) {
-                $('.blocks-holder > .decredblockWrap')[i - 1].remove();
-            }
-        }
-    }
-
-    function padEmptyBlocksIfNeeded() {
-        var blocksHolder = $('.blocks-holder')[0];
-        var perRow = blocksHolder.clientWidth / 310;
-        var totalInDisplay = $('.blocks-holder > .decredblockWrap').length;
-        var lastRowSurplus = $('.blocks-holder > .decredblockWrap').length % ($('.blocks-holder')[0].clientWidth / 310);
-
-        for (var i = lastRowSurplus; i < perRow; i++) {
-            var emptyBlockDiv = document.createElement('div');
-            emptyBlockDiv.className = "decredblockWrap";
-            emptyBlockDiv.innerHTML = "&nbsp;";
-            blocksHolder.appendChild(emptyBlockDiv);
-        }
-    }
-
-    function resizeRowsInEachBlock() {
-        // get total amount in each row and use as flex-grow value
-        $('.block-rows > *').each(function(){
-            var row = $(this);
-            var totalAmountInRow;
-
-            if (row.hasClass('block-rewards')) {
-                totalAmountInRow = +(row.find('.pow').attr('data-value'));
-                totalAmountInRow += +(row.find('.fund').attr('data-value'));
-                totalAmountInRow += +(row.find('.fees').attr('data-value'));
-                row.css('flex-grow', totalAmountInRow);
-            }
-            else {
-                totalAmountInRow = 0;
-                row.find('span').each(function() {
-                    totalAmountInRow += +$(this).attr('data-size');
-                })
-            }
-
-            row.css('flex-grow', totalAmountInRow);
-        })
-    }
-
-    function appendEmptyBlocksToEachRow() {
-        $('.block-votes').each(function() {
-            var blockVotes = $(this);
-            var votes = blockVotes.children().length;
-            for (var i = 0; i < 5 - votes; i++) {
-                blockVotes.append('<span title="Empty ticket slot"></span>');
-            }
-
-            // paint percentage of pow and pos relative to vote count
-            blockVotes.parent().find('.block-rewards .paint').css('width', (votes * 100 / 5) + '%');
-        })
-
-        $('.block-tickets').each(function() {
-            var blockTicketsAndRevs = $(this);
-            var count = blockTicketsAndRevs.children().length;
-            for (var i = 0; i < 20 - count; i++) {
-                blockTicketsAndRevs.append('<span title="Empty ticket slot"></span>');
-            }
-        })
-    }
-
-    function applyOpacityBasedOnInputsOutputs() {
-        $('.block-ticket').each(function() {
-            var blockTicket = $(this);
-            var opacity = ((+blockTicket.attr('data-input')) + (+blockTicket.attr('data-output'))) / 10;
-            blockTicket.css('opacity', opacity);
-        })
-
-        $('.block-rev').each(function() {
-            var blockRev = $(this);
-            var opacity = ((+blockRev.attr('data-input')) + (+blockRev.attr('data-output'))) / 10;
-            blockRev.css('opacity', opacity);
-        })
-
-        $('.block-tx').each(function() {
-            var blockTx = $(this);
-            var opacity = ((+blockTx.attr('data-input')) + (+blockTx.attr('data-output'))) / 10;
-            blockTx.css('opacity', opacity);
-
-            var amount = blockTx.attr('data-size');
-            blockTx.css('flex-grow', amount);
-        })
-    }
-
-    function setupTooltips() {
-        // check for emtpy tx rows and set custom tooltip
-        $('.block-transactions').each(function() {
-            var blockTx = $(this);
-            if (blockTx.children().length === 0) {
-                blockTx.attr('title', 'No standard transactions in block');
-            }
-        })
-
-        $('.block-rows [title]').each(function() {
-            var tooltipElement = $(this);
-            try {
-                // parse the content
-                var data = JSON.parse(tooltipElement.attr('title'));
-                var newContent;
-                if (data.object === "Vote") {
-                    newContent = `<b>${data.object} (${(data.vote === "true") ? "Yes" : "No"})</b><br>${data.total} DCR`;
-                }
-                else {
-                    newContent = `<b>${data.object}</b><br>${data.total} DCR`;
-                }
-
-                if (data.vin && data.vout) {
-                    newContent += `<br>${data.vin} Inputs, ${data.vout} Outputs`
-                }
-                
-                tooltipElement.attr('title', newContent);
-            }
-            catch (error) {}
-        })
-
-        tippy('.block-rows [title]', {
-            allowTitleHTML: true,
-            animation: 'shift-away',
-            arrow: true,
-            createPopperInstanceOnInit: true,
-            dynamicTitle: true,
-            performance: true,
-            placement: 'top',
-            size: 'small',
-            sticky: true,
-            theme: 'light'
-        })
-    }
-    </script>
+<script src="https://unpkg.com/tippy.js@2.5.4/dist/tippy.all.min.js"></script>
+<style>
+.block-rows > div > span > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.container {
+    max-width: 90% !important;
+}
+.flex-space {
+    flex: 0.1 0 10px;
+}
+.tippy-tooltip.light-theme {
+    color: #26323d;
+    box-shadow: 0 0 20px 4px rgba(154,161,177,.15), 0 4px 80px -8px rgba(36,40,47,.25), 0 4px 4px -2px rgba(91,94,105,.15);
+    background-color: #fff;
+}
+.tippy-popper[x-placement^=top] .tippy-arrow {
+    border-top-color: white;
+}
+</style>
+<script type="text/javascript" src="/js/controllers/blocks.js"></script>
+<script type="text/javascript" src="/js/controllers/block-socket-update.js"></script>
 <body>
     {{ template "navbar" . }}
     <div id="mainContainer" class="container" data-controller="main">
@@ -297,132 +155,17 @@
                     <h3 class="title font-weight-bold">Decred Blockchain</h3>
                 </a>
                 <div class="blocks-holder">
-                    {{with .Mempool}}
-                    <div id="mempool-info" class="decredblockWrap">
-                        <div class="decredblock">
-                            <div class="info-block">
-                                <a class="color-code" href="/mempool">Mempool</a>
-                            </div>
-                            <div class="block-rows">
-                                <div class="block-rewards">
-                                    <span class="pow"></span>
-                                    <span class="pos"></span>
-                                    <span class="fund"></span>
-                                    <span class="fees"></span>
-                                </div>
-                                <div class="block-votes">
-                                    {{range .Votes}}
-                                    <span data-size="{{.Total}}" style="background-color: {{if .VoteInfo.Validation.Validity}}#6D92DB{{else}}#FF0000{{end}}" data-txid="{{.TxID}}"
-                                        title='{"object": "Vote", "total": "{{.Total}}", "vote": "{{.VoteInfo.Validation.Validity}}"}'></span>
-                                    {{end}}
-                                </div>
-                                <div class="block-tickets">
-                                    {{range .Tickets}}
-                                    <span class="block-ticket" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}"
-                                        title='{"object": "Ticket", "total": "{{.Total}}", "vout": "{{len .Vout}}", "vin": "{{len .Vin}}"}'>
-                                        <a href="/tx/{{.TxID}}"></a>
-                                    </span>
-                                    {{end}}
-                                    {{range .Revocations}}
-                                    <span class="block-rev" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}"
-                                        title='{"object": "Revocation", "total": "{{.Total}}", "vout": "{{len .Vout}}", "vin": "{{len .Vin}}"}'>
-                                        <a href="/tx/{{.TxID}}"></a>
-                                    </span>
-                                    {{end}}
-                                </div>
-                                <div class="block-transactions">
-                                    {{range .Transactions}}
-                                    {{if eq .Coinbase false}}
-                                    <span class="block-tx" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}"
-                                        title='{"object": "Transaction", "total": "{{.Total}}", "vout": "{{len .Vout}}", "vin": "{{len .Vin}}"}'>
-                                        <a href="/tx/{{.TxID}}"></a>
-                                    </span>
-                                    {{end}}
-                                    {{end}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{end}}
-
-                    {{range .Blocks}}
-                    <div class="block-info decredblockWrap">
-                        <div class="decredblock">
-                            <div class="info-block">
-                                <a id="block-height" class="color-code" href="/block/{{.Height}}">{{.Height}}</a>
-                                <div class="mono d-flex" style="line-height: 1;">
-                                    {{template "decimalParts" (float64AsDecimalParts .TotalSent 8 false)}}
-                                    <span class="pl-1 unit">DCR</span>
-                                </div>
-                                <span class="timespan">
-                                    <span id="block-age" data-target="main.age" data-age="{{.BlockTime}}"></span>&nbsp;ago
-                                </span>
-                            </div>
-                            <div class="block-rows">
-                                <div class="block-rewards">
-                                    {{with .Subsidy}}
-                                    <span class="pow" data-value="{{toFloat64Amount .PoW}}" style="flex-grow: {{.PoW}}"
-                                        title='{"object": "PoW Reward", "total": "{{toFloat64Amount .PoW}}"}'>
-                                        <span class="paint"></span>
-                                    </span>
-                                    <span class="pos" data-value="{{toFloat64Amount .PoS}}" style="flex-grow: {{.PoS}}"
-                                        title='{"object": "PoS Reward", "total": "{{toFloat64Amount .PoS}}"}'>
-                                        <span class="paint"></span>
-                                    </span>
-                                    <span class="fund" data-value="{{toFloat64Amount .Developer}}" style="flex-grow: {{.Developer}}"
-                                        title='{"object": "Project Fund", "total": "{{toFloat64Amount .Developer}}"}'></span>
-                                    {{end}}
-                                    <span class="fees" data-value="{{.MiningFee}}" style="flex-grow: {{.MiningFee}}"
-                                        title='{"object": "Tx Fees", "total": "{{.MiningFee}}"}'></span>
-                                </div>
-                                <div class="block-votes">
-                                    {{range .Votes}}
-                                    <span data-size="{{.Total}}" style="background-color: {{if .VoteInfo.Validation.Validity}}#6D92DB{{else}}#FF0000{{end}}"
-                                        title='{"object": "Vote", "total": "{{.Total}}", "vote": "{{.VoteInfo.Validation.Validity}}"}'>
-                                        <a href="/tx/{{.TxID}}"></a>
-                                    </span>
-                                    {{end}}
-                                </div>
-                                <div class="block-tickets">
-                                    {{range .Tickets}}
-                                    <span class="block-ticket" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}"
-                                        title='{"object": "Ticket", "total": "{{.Total}}", "vout": "{{len .Vout}}", "vin": "{{len .Vin}}"}'>
-                                        <a href="/tx/{{.TxID}}"></a>
-                                    </span>
-                                    {{end}}
-                                    {{range .Revs}}
-                                    <span class="block-rev" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}"
-                                        title='{"object": "Revocation", "total": "{{.Total}}", "vout": "{{len .Vout}}", "vin": "{{len .Vin}}"}'>
-                                        <a href="/tx/{{.TxID}}"></a>
-                                    </span>
-                                    {{end}}
-                                </div>
-                                <div class="block-transactions">
-                                    {{range .Tx}}
-                                    {{if eq .Coinbase false}}
-                                    <span class="block-tx" data-input="{{len .Vin}}" data-output="{{len .Vout}}" data-size="{{.Total}}"
-                                        title='{"object": "Transaction", "total": "{{.Total}}", "vout": "{{len .Vout}}", "vin": "{{len .Vin}}"}'>
-                                        <a href="/tx/{{.TxID}}"></a>
-                                    </span>
-                                    {{end}}
-                                    {{end}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{end}}
-                    <script>
-                        // resizeRowsInEachBlock();
-                        appendEmptyBlocksToEachRow();
-                        applyOpacityBasedOnInputsOutputs();
-                        setupTooltips();
-                        figureNumberOfBlocksToDisplay();
-                    </script>
   		        </div>
                 <a class="no-underline" style="display: block; margin-top: 25px;" href="/blocks"><div class="showmore"><p>View BlockChain History</p></div></a>
             </div>
         </div>
     </div>
+
+    <script>
+        blocks = {{.Blocks}};
+        blocks.splice(0, 0, {{.Mempool}})
+        displayBlocks();
+    </script>
 
     {{ template "footer" . }}
 </body>
