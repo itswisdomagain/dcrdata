@@ -274,17 +274,7 @@
                 $("#hashrate").html(humanize.decimalParts(ex.hash_rate, false, 8, false, 2))
                 $("#hashrate-subdata").html("("+ humanize.fmtPercentage(ex.hash_rate_change)+ " in 24hr)")
 
-                var newB = $(".block-info").first().clone(true)
-                newB.find("#block-height").text(b.height)
-                newB.find("#block-age").attr("data-age", b.time)
-                newB.find("#total-sent").html(humanize.decimalParts(b.TotalSent, false, 2, false, 2))
-                newB.find("#tx-count").text("sent in "+b.AllTxs+" transactions")
-                newB.find("#votes").text(b.votes)
-                newB.find("#tickets").text(b.tickets)
-                newB.find("#show-block").attr("href", "/block/" + b.height)
-                $(newB).insertAfter("#mempool-info")
-
-                $(".block-info").last().remove()
+                handleBlockUpdate(newBlock.block)
             }
 
              if (window.location.pathname == "/"){
