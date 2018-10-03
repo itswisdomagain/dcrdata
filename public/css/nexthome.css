@@ -1,9 +1,19 @@
 @import url("https://fonts.googleapis.com/css?family=Inconsolata:400,700|Source+Sans+Pro:400,600");
 header .container {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     height: 40px;
+}
+
+header .logo {
+  height: 50%;
+  display: inline-block;
+}
+
+header .logo img {
+  height: 100%;
+  vertical-align: initial;
 }
 
 header .right {
@@ -13,14 +23,19 @@ header .right {
     align-items: center;
 }
 
+header #search-form {
+  align-items: center;
+}
+
 header .right .searchbox {
     cursor: pointer;
+    position: relative;
 }
 
 header .right .searchbox img {
-    height: 20px;
-    width: 20px;
-    margin: auto 5px 0px;
+    width: 16px;
+    position: absolute;
+    margin-left: 8px;
 }
 
 header .right .searchbox input {
@@ -28,6 +43,7 @@ header .right .searchbox input {
     border: none;
     border-bottom: 1px solid #c3cad1;
     transition: 0.2s ease-out;
+    padding-left: 30px;
 }
 
 header .right .searchbox input.hide {
@@ -35,9 +51,8 @@ header .right .searchbox input.hide {
 }
 
 header .right .searchbox.full {
-    width: 95%;
-    flex: 1;
-    margin: 2%;
+  flex-grow: 1;
+  margin: 0 2rem;
 }
 
 header .right .searchbox.full input {
@@ -146,7 +161,7 @@ body {
     background: white;
     overflow: hidden;
     transition: 0.2s ease-in-out;
-    border: 1px solid black;
+    border: 1px solid #c4cbd2;
     position: relative;
     overflow: visible;
 }
@@ -154,7 +169,8 @@ body {
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows {
   display: flex;
   flex-direction: column;
-  height: 100px;
+  height: 90px;
+  padding: 1px;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * {
@@ -164,11 +180,15 @@ body {
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
-  border-top: 1px solid black;
+  border-top: 1px solid white;
+}
+
+.decBlockchainWrapper .decredblockWrap .decredblock .block-rows > *:first-child {
+    border-top: none;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * > * {
-  border-left: 1px solid black;
+  border-left: 1px solid white;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * > *:first-child {
@@ -177,7 +197,7 @@ body {
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > * {
   position: relative;
-  flex-basis: 5px;
+  flex-basis: 10px;
   flex-grow: 1;
 }
 
@@ -198,11 +218,11 @@ body {
   left: 0;
   top: 0;
   height: 100%;
-  background-color: #6bdf6e;
+  background-color: #2ed6a1;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .fees {
-  background-color: #06ff00;
+  background-color: #2ed6a1;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-votes > *,
@@ -213,15 +233,15 @@ body {
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-tickets > .block-ticket {
-  background-color: #FCB300;
+  background-color: #FFC84D;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-tickets > .block-rev {
-  background-color: #FF008A;
+  background-color: #FD714A;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-transactions > .block-tx {
-  background-color: #9A9A9A;
+  background-color: #c4cbd2;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock .info-block {
@@ -233,18 +253,31 @@ body {
   transition: 0.2s ease-in-out;
   overflow: hidden;
   font-size: 14px;
+  border-bottom: 1px solid #c4cbd2;
+}
+
+.decBlockchainWrapper .decredblockWrap .decredblock .info-block > * {
+    flex-basis: 0;
+    flex-grow: 1;
+    text-align: center;
+}
+.decBlockchainWrapper .decredblockWrap .decredblock .info-block > *:first-child {
+    text-align: left;
+}
+.decBlockchainWrapper .decredblockWrap .decredblock .info-block > *:last-child {
+    text-align: right;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock a.color-code {
   font-family: "Source Sans Pro", sans-serif;
   line-height: 1;
-  color: #6d92db;
+  color: #989898;
 }
 
 .decBlockchainWrapper .decredblockWrap .decredblock span.timespan {
   font-family: "Source Sans Pro", sans-serif;
   line-height: 1;
-  color: #505050;
+  color: #989898;
 }
 
 .networkStatsWrapper .title {

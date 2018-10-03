@@ -25,7 +25,7 @@
 }
 </style>
 <script type="text/javascript" src="/js/controllers/blocks.js"></script>
-<script type="text/javascript" src="/js/controllers/block-socket-update.js"></script>
+<script type="text/javascript" src="/js/controllers/nexthome-socket-update.js"></script>
 <body>
     {{ template "navbar" . }}
     <div id="mainContainer" class="container" data-controller="main">
@@ -162,8 +162,12 @@
     </div>
 
     <script>
+        // TODO: confirm if .Info.NBlockSubsidy actually represents mempool rewards
+        mempoolSubsidy = {{.Info.NBlockSubsidy}}
+
         blocks = {{.Blocks}};
         blocks.splice(0, 0, {{.Mempool}})
+        
         displayBlocks();
     </script>
 

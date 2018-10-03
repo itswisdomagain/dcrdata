@@ -103,6 +103,7 @@ type TrimmedTxInfo struct {
 	VoteValid bool
 	TxID      string
 	Total     float64
+	Fees      float64
 	Coinbase  bool
 }
 
@@ -363,6 +364,7 @@ type MempoolData struct {
 	Votes        []*TrimmedTxInfo
 	Revocations  []*TrimmedTxInfo
 	Total        float64
+	Time         int64
 }
 
 // MempoolInfo models data to update mempool info on the home page

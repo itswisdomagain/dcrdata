@@ -73,6 +73,7 @@
             })
             ws.registerEvtHandler("mempool", (evt) => {
                 var m = JSON.parse(evt)
+                console.log("update", evt);
                 this.renderLatestTransactions(m.latest, false)
                 $(this.numTicketTarget).text(m.num_tickets)
                 $(this.numVoteTarget).text(m.num_votes)
@@ -80,6 +81,7 @@
                 ws.send("getmempooltxs", "")
             });
             ws.registerEvtHandler("getmempooltxsResp", (evt) => {
+                console.log("resp", evt);
                 var m = JSON.parse(evt)
                 this.renderLatestTransactions(m.latest, true)
                 keyNav(evt, false, true)

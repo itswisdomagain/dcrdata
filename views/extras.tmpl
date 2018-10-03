@@ -46,9 +46,7 @@
 <header>
 <div class="top-nav">
     <div class="container">
-        <div class="logo">
-            <a class="no-underline" href="/"><img src="/images/logo-2018.svg" alt="dcr-icon"></a>
-        </div>
+        <a class="no-underline logo" href="/"><img src="/images/logo-2018.svg" alt="dcr-icon"></a>
         <div class="right">
             <div class="searchbox full">
                 <form class="navbar-form" role="search" id="search-form" action="/search" style="display: flex;">
@@ -300,11 +298,23 @@
         ws.registerEvtHandler("newblock", updateBlockData);
 
         ws.registerEvtHandler("mempool", function(event){
-            var mempool = JSON.parse(event);
-            $("#mempool-total-sent").html(humanize.decimalParts(mempool.total, false, 2, false, 2))
-            $("#mempool-tx-count").text("sent in "+mempool.num_all+" transactions")
-            $("#mempool-votes").text(mempool.num_votes)
-            $("#mempool-tickets").text(mempool.num_tickets)
+            if (window.location.pathname == "/nexthome") {
+                console.log("mempool update received, requesting for more data")
+                ws.send("getmempooltxs", "")
+            }
+            else {
+                var mempool = JSON.parse(event);
+                $("#mempool-total-sent").html(humanize.decimalParts(mempool.total, false, 2, false, 2))
+                $("#mempool-tx-count").text("sent in "+mempool.num_all+" transactions")
+                $("#mempool-votes").text(mempool.num_votes)
+                $("#mempool-tickets").text(mempool.num_tickets)
+            }
+        });
+
+        ws.registerEvtHandler("getmempooltxsResp", function(event) {
+            if (window.location.pathname == "/nexthome") {
+                handleMempoolUpdate(event);
+            }
         });
     }
 

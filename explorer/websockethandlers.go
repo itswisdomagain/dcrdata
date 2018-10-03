@@ -21,6 +21,40 @@ import (
 // close an already closed connection.
 var ErrWsClosed = "use of closed network connection"
 
+func trimTxInfo(txs []*TxInfo) []*TrimmedTxInfo {
+	trimmedTxs := make([]*TrimmedTxInfo, 0, len(txs))
+	for _, tx := range txs {
+		voteValid := false
+		if tx.IsVote() {
+			voteValid = tx.VoteInfo.Validation.Validity
+		}
+		trimmedTx := &TrimmedTxInfo{
+			VinCount:  len(tx.Vin),
+			VoutCount: len(tx.Vout),
+			VoteValid: voteValid,
+			TxID:      tx.TxID,
+			Total:     tx.Total,
+			Fees:      tx.Fee.ToCoin(),
+			Coinbase:  tx.Coinbase,
+		}
+		trimmedTxs = append(trimmedTxs, trimmedTx)
+	}
+	return trimmedTxs
+}
+func trimBlockInfo(block *BlockInfo) *TrimmedBlockInfo {
+	return &TrimmedBlockInfo{
+		Time:         block.BlockTime,
+		Height:       block.Height,
+		TotalSent:    block.TotalSent,
+		MiningFee:    block.MiningFee,
+		Subsidy:      block.Subsidy,
+		Votes:        trimTxInfo(block.Votes),
+		Tickets:      trimTxInfo(block.Tickets),
+		Revocations:  trimTxInfo(block.Revs),
+		Transactions: trimTxInfo(block.Tx),
+	}
+}
+
 // RootWebsocket is the websocket handler for all pages
 func (exp *explorerUI) RootWebsocket(w http.ResponseWriter, r *http.Request) {
 	wsHandler := websocket.Handler(func(ws *websocket.Conn) {
@@ -97,7 +131,47 @@ func (exp *explorerUI) RootWebsocket(w http.ResponseWriter, r *http.Request) {
 
 				case "getmempooltxs":
 					exp.MempoolData.RLock()
-					msg, err := json.Marshal(exp.MempoolData)
+
+					txCount := len(exp.MempoolData.Transactions)
+					mempoolTxs := make([]*TxInfo, 0, txCount)
+					for _, tx := range exp.MempoolData.Transactions {
+						exptx := exp.blockData.GetExplorerTx(tx.Hash)
+						for _, vin := range exptx.Vin {
+							if vin.IsCoinBase() {
+								exptx.Fee, exptx.FeeRate = 0.0, 0.0
+							}
+						}
+						mempoolTxs = append(mempoolTxs, exptx)
+					}
+					ticketsCount := len(exp.MempoolData.Tickets)
+					mempoolTickets := make([]*TxInfo, 0, ticketsCount)
+					for _, tx := range exp.MempoolData.Tickets {
+						exptx := exp.blockData.GetExplorerTx(tx.Hash)
+						mempoolTickets = append(mempoolTickets, exptx)
+					}
+					mempoolVotes := make([]*TxInfo, 0)
+					for _, tx := range exp.MempoolData.Votes {
+						if tx.VoteInfo.ForLastBlock == true {
+							exptx := exp.blockData.GetExplorerTx(tx.Hash)
+							mempoolVotes = append(mempoolVotes, exptx)
+						}
+					}
+					revCount := len(exp.MempoolData.Revocations)
+					mempoolRevs := make([]*TxInfo, 0, revCount)
+					for _, tx := range exp.MempoolData.Revocations {
+						exptx := exp.blockData.GetExplorerTx(tx.Hash)
+						mempoolRevs = append(mempoolRevs, exptx)
+					}
+					mempoolData := MempoolData{
+						Transactions: trimTxInfo(mempoolTxs),
+						Tickets:      trimTxInfo(mempoolTickets),
+						Votes:        trimTxInfo(mempoolVotes),
+						Revocations:  trimTxInfo(mempoolRevs),
+						Total:        exp.MempoolData.TotalOut,
+						Time:         exp.MempoolData.LastBlockTime,
+					}
+					msg, err := json.Marshal(mempoolData)
+
 					exp.MempoolData.RUnlock()
 
 					if err != nil {

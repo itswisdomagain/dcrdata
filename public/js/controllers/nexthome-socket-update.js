@@ -1,3 +1,17 @@
+function handleMempoolUpdate(evt) {
+	const mempool = JSON.parse(evt);
+	if (mempool.Votes.length === 0) {
+		console.log('mempool update discarded, can votes be 0?');
+		return;
+	}
+	
+	mempool.Time = Date.now() / 1000;
+	const mempoolElement = makeMempoolBlock(mempool);
+    $(mempoolElement).insertAfter($('.blocks-holder > *:first-child'));
+    $('.blocks-holder > *:first-child').remove();
+    setupTooltips();
+}
+
 function handleBlockUpdate(block) {
     const trimmedBlockInfo = trimBlockInfo(block);
     blocks.push(trimmedBlockInfo);

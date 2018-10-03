@@ -1,16 +1,16 @@
 const conversionRate = 100000000;
-let blocks, blocksHolder;
+let blocks, mempoolSubsidy, blocksHolder;
 
 function figureNumberOfBlocksToDisplay() {
     const pageContentPaddingMargin = $('body').outerHeight(true) - $('body').height();
     const availableHeight = $(window).height() - pageContentPaddingMargin - ($('.blocks-holder').position().top * 1.5); // 200px for other padding and margin before
-    const availableWidth = blocksHolder.outerWidth(true);
+    const availableWidth = blocksHolder.outerWidth();
 
     const blockWidth = $('.blocks-holder > .decredblockWrap').outerWidth(true);
     const blockHeight = $('.blocks-holder > .decredblockWrap').outerHeight(true);
 
     const maxBlocksPerRow = Math.floor(availableWidth / blockWidth);
-    let maxBlockRows = Math.ceil(availableHeight / blockHeight);
+    let maxBlockRows = Math.round(availableHeight / blockHeight);
     let nMaxBlockElements = maxBlocksPerRow * maxBlockRows;
 
     while (nMaxBlockElements > blocks.length) {
@@ -52,22 +52,22 @@ function displayBlocks() {
 }
 
 function makeMempoolBlock(block) {
+    let fees = 0;
+    for (const tx of block.Transactions) {
+        fees += tx.Fees;
+    }
+
     return `<div id="mempool-info" class="decredblockWrap">
                 <div class="decredblock">
                     <div class="info-block">
                         <a class="color-code" href="/mempool">Mempool</a>
-                        <div class="mono d-flex" style="line-height: 1;">
-                            <span class="int">${Math.floor(block.Total)}</span>
-                            <span class="pl-1 unit">DCR</span>
-                        </div>
+                        <div class="mono" style="line-height: 1;">${Math.floor(block.Total)} DCR</div>
+                        <span class="timespan">
+                            <span data-target="main.age" data-age="${block.Time}"></span>&nbsp;ago
+                        </span>
                     </div>
                     <div class="block-rows">
-                        <div class="block-rewards">
-                            <span class="pow"></span>
-                            <span class="pos"></span>
-                            <span class="fund"></span>
-                            <span class="fees"></span>
-                        </div>
+                        ${makeRewardsElement(mempoolSubsidy, fees, block.Votes.length, '#')}
                         ${makeVoteElements(block.Votes)}
                         ${makeTicketAndRevoctionElements(block.Tickets, block.Revocations)}
                         ${makeTransactionElements(block.Transactions)}
@@ -101,20 +101,26 @@ function newBlockHtmlElement(block) {
 function makeBlockSummary(blockHeight, totalSent, time) {
     return `<div class="info-block">
                 <a class="color-code" href="/block/${blockHeight}">${blockHeight}</a>
+                <div class="mono" style="line-height: 1;">${Math.floor(totalSent)} DCR</div>
                 <span class="timespan">
                     <span data-target="main.age" data-age="${time}"></span>&nbsp;ago
                 </span>
-                <div class="mono d-flex" style="line-height: 1;">
-                    <span class="int">${Math.floor(totalSent)}</span>
-                    <span class="pl-1 unit">DCR</span>
-                </div>
             </div>`;
 }
 
 function makeRewardsElement(subsidy, fee, voteCount, rewardTxId) {
+    if (!subsidy) {
+        return `<div class="block-rewards">
+                    <span class="pow"><span class="paint" style="width:100%;"></span></span>
+                    <span class="pos"><span class="paint" style="width:100%;"></span></span>
+                    <span class="fund"><span class="paint" style="width:100%;"></span></span>
+                    <span class="fees" title='{"object": "Tx Fees", "total": "${fee}"}'></span>
+                </div>`;
+    }
+
     const pow = subsidy.pow / conversionRate;
     const pos = subsidy.pos / conversionRate;
-    const fund = subsidy.developer / conversionRate;
+    const fund = (subsidy.developer || subsidy.dev) / conversionRate;
     
     const backgroundColorRelativeToVotes = `style="width: ${voteCount * 20}%"`; // 5 blocks = 100% painting
 
@@ -150,7 +156,7 @@ function makeVoteElements(votes) {
     let totalDCR = 0;
     const voteElements = (votes || []).map(vote => {
         totalDCR += vote.Total;
-        return `<span style="background-color: ${vote.VoteValid ? '#6D92DB' : '#FF0000' }"
+        return `<span style="background-color: ${vote.VoteValid ? '#2971ff' : 'rgba(253, 113, 74, 0.8)' }"
                     title='{"object": "Vote", "total": "${vote.Total}", "vote": "${vote.VoteValid}"}'>
                     <a href="/tx/${vote.TxID}"></a>
                 </span>`;
@@ -211,7 +217,8 @@ function makeTransactionElements(transactions) {
 }
 
 function makeTxElement(tx, className, type, appendFlexGrow) {
-    const style = [ `opacity: ${(tx.VinCount + tx.VoutCount) / 10}` ];
+    // const style = [ `opacity: ${(tx.VinCount + tx.VoutCount) / 10}` ];
+    const style = [];
     if (appendFlexGrow) {
         style.push(`flex-grow: ${Math.round(tx.Total)}`);
     }
