@@ -27,16 +27,15 @@ header .right .searchbox {
     position: relative;
 }
 header .right .searchbox img {
-    width: 16px;
-    position: absolute;
-    margin-left: 8px;
+    width: 20px;
+    margin-right: 5px;
+    align-self: flex-end;
 }
 header .right .searchbox input {
     font-family: "Source Sans Pro", sans-serif;
     border: none;
     border-bottom: 1px solid #c3cad1;
     transition: 0.2s ease-out;
-    padding-left: 30px;
 }
 header .right .searchbox input.hide {
     width: 0px !important;
