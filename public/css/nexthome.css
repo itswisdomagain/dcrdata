@@ -5,39 +5,32 @@ header .container {
     justify-content: space-between;
     height: 40px;
 }
-
 header .logo {
   height: 50%;
   display: inline-block;
 }
-
 header .logo img {
   height: 100%;
   vertical-align: initial;
 }
-
 header .right {
     display: flex;
     flex: 1;
     justify-content: flex-end;
     align-items: center;
 }
-
 header #search-form {
   align-items: center;
 }
-
 header .right .searchbox {
     cursor: pointer;
     position: relative;
 }
-
 header .right .searchbox img {
     width: 16px;
     position: absolute;
     margin-left: 8px;
 }
-
 header .right .searchbox input {
     font-family: "Source Sans Pro", sans-serif;
     border: none;
@@ -45,20 +38,16 @@ header .right .searchbox input {
     transition: 0.2s ease-out;
     padding-left: 30px;
 }
-
 header .right .searchbox input.hide {
     width: 0px !important;
 }
-
 header .right .searchbox.full {
   flex-grow: 1;
   margin: 0 2rem;
 }
-
 header .right .searchbox.full input {
     width: 95%;
 }
-
 header .right .switch {
     font-size: 14px;
     font-family: "Source Sans Pro", sans-serif;
@@ -66,97 +55,111 @@ header .right .switch {
     cursor: pointer;
     transition: 0.2s linear;
 }
-
 header .right .switch span img {
     width: 20px;
     margin: 0px 5px;
     transition: 0.1s linear;
 }
-
 header .right .switch:hover {
     opacity: 0.5;
 }
-
 header .right .switch:hover span img {
     transform: rotate(180deg);
 }
-
 header .right .menu {
     position: relative;
     height: 19px;
     width: 25px;
     cursor: pointer;
 }
-
 header .right .menu span {
     position: absolute;
     transition: 0.1s linear;
 }
-
 header .right .menu span.one {
     height: 3px;
     width: 100%;
     top: 0;
     background: #17173C;
 }
-
 header .right .menu span.two {
     height: 3px;
     width: 100%;
     top: 8px;
     background: #17173C;
 }
-
 header .right .menu span.three {
     height: 3px;
     width: 60%;
     bottom: 0px;
     background: #17173C;
 }
-
 header .right .menu:hover span.one {
     width: 60%;
 }
-
 header .right .menu:hover span.three {
     width: 100%;
 }
-
 *:focus {
     outline: none !important;
 }
-
 body {
     background-color: #F4F6F6;
 }
-
+.block-rows > div > span > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+#nexthome .container {
+    max-width: 90% !important;
+}
+#mainContainer {
+    display: flex;
+    flex-wrap: wrap;
+}
+.flex-space {
+    width: 5%;
+}
+.networkStatsWrapper, .decBlockchainWrapper {
+    margin: 30px 0;
+}
+@media (max-width: 1000px) {
+    .networkStatsWrapper {
+        width: 100%;
+    }
+    .flex-space {
+        display: none;
+    }
+    .decBlockchainWrapper {
+        margin-top: 0;
+    }
+}
+.tippy-tooltip.light-theme {
+    color: #26323d;
+    box-shadow: 0 0 20px 4px rgba(154,161,177,.15), 0 4px 80px -8px rgba(36,40,47,.25), 0 4px 4px -2px rgba(91,94,105,.15);
+    background-color: #fff;
+}
+.tippy-popper[x-placement^=top] .tippy-arrow {
+    border-top-color: white;
+}
 .decBlockchainWrapper {
     flex-grow: 1;
-    flex-basis: 300px;
+    flex-basis: 250px;
 }
-
 .decBlockchainWrapper .title {
     font-family: "Source Sans Pro", sans-serif;
     font-size: 20px;
     margin-bottom: 30px;
 }
-
 .blocks-holder {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    margin: -5px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(250px, 1fr));
+    grid-gap: 20px;
 }
-
-.decBlockchainWrapper .decredblockWrap {
-    margin: 5px;
-    width: 300px;
-}
-
 .decBlockchainWrapper .decredblockWrap.fade {
     opacity: 0.5;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock {
     background: white;
     overflow: hidden;
@@ -165,14 +168,12 @@ body {
     position: relative;
     overflow: visible;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows {
   display: flex;
   flex-direction: column;
   height: 90px;
   padding: 1px;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * {
   flex-basis: 5px;
   flex-grow: 1;
@@ -182,37 +183,29 @@ body {
   align-items: stretch;
   border-top: 1px solid white;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > *:first-child {
     border-top: none;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * > * {
   border-left: 1px solid white;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > * > *:first-child {
   border-left: none;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > * {
   position: relative;
   flex-basis: 10px;
   flex-grow: 1;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .pow .paint {
   opacity: 0.4;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .pos .paint {
   opacity: 0.6;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .fund .paint {
   opacity: 0.8;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards .paint {
   position: absolute;
   left: 0;
@@ -220,30 +213,24 @@ body {
   height: 100%;
   background-color: #2ed6a1;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-rewards > .fees {
   background-color: #2ed6a1;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-votes > *,
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-tickets > *,
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-transactions > * {
   flex-basis: 0;
   flex-grow: 1;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-tickets > .block-ticket {
   background-color: #FFC84D;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-tickets > .block-rev {
   background-color: #FD714A;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .block-rows > .block-transactions > .block-tx {
   background-color: #c4cbd2;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .info-block {
   width: 100%;
   display: flex;
@@ -255,65 +242,56 @@ body {
   font-size: 14px;
   border-bottom: 1px solid #c4cbd2;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock .info-block > * {
     flex-basis: 0;
     flex-grow: 1;
     text-align: center;
-}
-.decBlockchainWrapper .decredblockWrap .decredblock .info-block > *:first-child {
+}.decBlockchainWrapper .decredblockWrap .decredblock .info-block > *:first-child {
     text-align: left;
-}
-.decBlockchainWrapper .decredblockWrap .decredblock .info-block > *:last-child {
+}.decBlockchainWrapper .decredblockWrap .decredblock .info-block > *:last-child {
     text-align: right;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock a.color-code {
   font-family: "Source Sans Pro", sans-serif;
   line-height: 1;
   color: #989898;
 }
-
 .decBlockchainWrapper .decredblockWrap .decredblock span.timespan {
   font-family: "Source Sans Pro", sans-serif;
   line-height: 1;
   color: #989898;
 }
-
+.networkStatsWrapper {
+    flex-shrink: 0;
+}
 .networkStatsWrapper .title {
     font-family: "Source Sans Pro", sans-serif;
     font-size: 20px;
     margin-bottom: 30px;
 }
-
 .networkStatsWrapper .statCard {
-  width: 500px;
   background: white;
-  padding: 15px 25px;
+  padding: 15px;
   font-family: "Source Sans Pro", sans-serif;
   border-radius: 4px;
   margin-bottom: 20px;
 }
-
 .networkStatsWrapper .statCard img {
     margin-top: 4px;
     margin-bottom: 12px;
     margin-right: 12px;
     float: left;
 }
-
 .networkStatsWrapper .statCard p.statcard-title {
     font-family: "Source Sans Pro", sans-serif;
     color: #17173C;
     margin-bottom: 0px;
     font-size: 14px;
 }
-
 .networkStatsWrapper .statCard .heading {
     color: #8997A5;
     font-size: 12px;
 }
-
 .networkStatsWrapper .statCard .data {
     font-family: "Inconsolata", monospace;
     font-size: 22px;
@@ -322,21 +300,17 @@ body {
     flex-direction: row;
     align-items: flex-end;
 }
-
 .networkStatsWrapper .statCard .data span:first-child {
     display: flex;
     flex-direction: row;
     align-items: flex-end;
 }
-
 .networkStatsWrapper .statCard .data p {
     margin: 0px;
 }
-
 .networkStatsWrapper .statCard span {
     line-height: 29px;
 }
-
 .networkStatsWrapper .statCard .subdata {
     display: flex;
     flex-direction: row;
@@ -344,15 +318,12 @@ body {
     font-weight: semibold;
     color: #8997A5;
 }
-
 .networkStatsWrapper .statCard .subdata p {
     margin: 0px;
 }
-
 .networkStatsWrapper .statCard .subdata span {
     font-size: 12px;
 }
-
 .showmore {
     background: white;
     display: flex;
@@ -362,51 +333,42 @@ body {
     cursor: pointer;
     border-radius: 4px;
 }
-
 .showmore p {
     margin-bottom: 0px;
     font-family: "Source Sans Pro", sans-serif;
     color: #8997A5;
     font-size: 14px;
 }
-
 .blockhchainWrapper {
     padding: 60px 0px;
 }
-
 .blockhchainWrapper .title {
     font-family: "Source Sans Pro", sans-serif;
     color: #2970FF;
     font-size: 20px;
     margin-bottom: 30px;
 }
-
 .blockhchainWrapper table#blockchainTable {
     width: 100%;
     font-family: "Source Sans Pro", sans-serif;
 }
-
 .blockhchainWrapper table#blockchainTable tr {
     border-bottom: 1px solid #d1d7dc;
 }
-
 .blockhchainWrapper table#blockchainTable tr.heading {
     background: #ffffff;
     color: #17173C;
     height: 40px;
 }
-
 .blockhchainWrapper table#blockchainTable tr.data {
     font-family: "Inconsolata", monospace;
     height: 50px;
     cursor: pointer;
     transition: 0.1s linear;
 }
-
 .blockhchainWrapper table#blockchainTable tr.data td.blocks {
     color: #2970FF;
 }
-
 .blockhchainWrapper table#blockchainTable tr.data td.selector {
     position: relative;
     display: flex;
@@ -415,7 +377,6 @@ body {
     width: 50px;
     height: 50px;
 }
-
 .blockhchainWrapper table#blockchainTable tr.data td.selector span {
     position: absolute;
     background: none;
@@ -424,15 +385,12 @@ body {
     height: 20px;
     border-radius: 50px;
 }
-
 .blockhchainWrapper table#blockchainTable tr.data td.selector span.clicked {
     background: #2970FF;
 }
-
 .blockhchainWrapper table#blockchainTable tr.data:hover {
     background: #eeeeee;
 }
-
 footer {
     background: white;
     height: 50px;
@@ -443,7 +401,6 @@ footer {
     color: #8997A5;
     font-size: 12px;
 }
-
 footer .container {
     display: flex;
     flex-direction: row;
@@ -451,22 +408,18 @@ footer .container {
     align-items: center;
     justify-content: space-between;
 }
-
 footer .container p {
     margin-bottom: 0px;
 }
-
 footer .container .left * {
     float: left;
 }
-
 footer .container .right {
     position: relative;
     padding-right: 17px;
     display: flex;
     align-items: center;
 }
-
 footer .container .right span {
     position: absolute;
     width: 15px;
@@ -474,28 +427,23 @@ footer .container .right span {
     right: 0px;
     border-radius: 25px;
 }
-
 footer .container .right span.red {
     background: red;
     border: 3px solid #ffcccc;
 }
-
 footer .container .right span.green {
     background: #0ead8f;
     border: 3px solid #91f6e3;
 }
-
 #mainContainer.stats {
     padding: 60px 0px;
 }
-
 #mainContainer.stats .title {
     font-family: "Source Sans Pro", sans-serif;
     color: #3D5873;
     font-size: 30px;
     margin-bottom: 30px;
 }
-
 #mainContainer.stats .statCardWrap {
     display: flex;
     flex-direction: column;
@@ -506,7 +454,6 @@ footer .container .right span.green {
     margin-bottom: 25px;
     height: 160px;
 }
-
 #mainContainer.stats .statCardWrap .heading {
     display: flex;
     height: 40px;
@@ -520,41 +467,34 @@ footer .container .right span.green {
     padding: 7.5px;
     text-transform: uppercase;
 }
-
 #mainContainer.stats .statCardWrap .content {
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
 }
-
 #mainContainer.stats .statCardWrap .content .data {
     width: 80%;
     padding: 25px 0px;
 }
-
 #mainContainer.stats .statCardWrap .content .data .count {
     font-family: "Source Sans Pro", sans-serif;
     font-size: 35px;
     font-weight: bold;
     color: #3D5873;
 }
-
 #mainContainer.stats .statCardWrap .content .data .count span.subcount {
     font-size: 16px;
 }
-
 #mainContainer.stats .statCardWrap .content .data a .footing {
     font-size: 14px;
     color: #2970FF;
 }
-
 #mainContainer.stats .statCardWrap .content .data .footing {
     font-size: 14px;
     color: #C4CBD2;
     font-family: "Source Sans Pro", sans-serif;
 }
-
 #mainContainer.stats .statCardWrap .progress {
     position: relative;
     overflow: visible;
@@ -563,12 +503,10 @@ footer .container .right span.green {
     margin-bottom: 5px;
     margin-top: 35px;
 }
-
 #mainContainer.stats .statCardWrap .progress .progress-bar {
     border-radius: 100px;
     background: #1dd0aa;
 }
-
 #mainContainer.stats .statCardWrap .progress .progress-bar .tool {
     position: absolute;
     font-family: "Source Sans Pro", sans-serif;
@@ -580,62 +518,50 @@ footer .container .right span.green {
     padding: 5px;
     transition: .6s linear;
 }
-
 .lh15rem {
     line-height: 1.5rem !important;
 }
-
 #mainContainer.stats.collaspe .statCardWrap {
     margin-bottom: 0px;
     height: 75px;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .heading {
     justify-content: flex-start;
     padding-left: 5%;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content {
     justify-content: flex-start;
     text-align: left;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content .data {
     position: relative;
     width: 100%;
     padding: 25px 5%;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content .data .progress {
     border-radius: 2px;
     margin-bottom: 0px;
     background: #8997A5;
     margin-top: 0px;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content .data .progress .progress-bar {
     border-radius: 2px;
     background: #1dd0aa;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content .data .progress .progress-bar .tool {
     display: none;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content .data .count {
     font-family: "Source Sans Pro", sans-serif;
     font-size: 16px;
     font-weight: normal;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content .data .count span.subcount {
     font-size: 16px;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content .data .footing {
     display: none;
 }
-
 #mainContainer.stats.collaspe .statCardWrap .content .data .progress + .footing {
     display: block;
     position: absolute;
@@ -644,99 +570,70 @@ footer .container .right span.green {
     left: calc(5% + 7px);
     z-index: 99;
 }
-
 .img-size {
     height: 20px;
 }
-
 .networkStatsWrap,
 .blockRewardsWrapper,
 .proofofstakeWrapper {
     padding-right: 50px;
 }
-
 .info-block .expanded-block .row .col-12 img {
     margin-right: 3%;
     margin-top: 2%;
     height: 20px;
 }
-
 @media (min-width: 1400px) {
     .container {
         max-width: 1280px !important;
-    }
-    .container .logo a img {
+    }    .container .logo a img {
         width: 100px !important;
-    }
-}
-
+    }}
 @media (min-width: 800px) {
     header .right .searchbox.full input {
         flex: 1;
-    }
-}
-
+    }}
 @media (max-width: 600px) {
     header .right .searchbox input {
         width: 150px;
-    }
-}
-
+    }}
 @media only screen and (max-width: 768px) {
     .container {
         max-width: 85% !important;
-    }
-    .container .logo a img {
+    }    .container .logo a img {
         width: 70px !important;
-    }
-    .col-md-6 {
+    }    .col-md-6 {
         flex: 0 0 50%;
         max-width: 100%;
-    }
-    .col-sm-4 {
+    }    .col-sm-4 {
         flex: 0 0 33.333333%;
         max-width: 33.333333%;
-    }
-    .col-lg-4 {
+    }    .col-lg-4 {
         flex: 0 0 100%;
         max-width: 33.333333%;
-    }
-    .networkStatsWrapper .statCard {
+    }    .networkStatsWrapper .statCard {
         margin-right: 1% !important;
         min-height: fit-content;
-    }
-    .dcr-icon {
+    }    .dcr-icon {
         width: 100px;
-    }
-    .dcr-icon-container {
+    }    .dcr-icon-container {
         width: 100px;
-    }
-}
-
+    }}
 @media only screen and (max-width: 576px) {
-    .networkStatsWrapper {
-        padding: 40px 0px;
-    }
     .decBlockchainWrapper {
         padding: 0px 0px;
-    }
-    .col-lg-4 {
+    }  .col-lg-4 {
         flex: 0 0 100%;
         max-width: 50%;
-    }
-    .col-sm-4 {
+    } .statCard .col-sm-4 {
         flex: 0 0 100%;
         max-width: 100%;
-        padding-right: 0px;
-        padding-left: 0px;
-    }
-    .dcr-icon {
+        padding-left: 15px;
+        padding-right: 15px;
+    } .dcr-icon {
         width: 60px;
-    }
-    .dcr-icon-container {
+    }    .dcr-icon-container {
         width: 60px;
-    }
-    .navbar-fixed-bottom {
+    }    .navbar-fixed-bottom {
         font-size: 12px;
-    }
-}
+    }}

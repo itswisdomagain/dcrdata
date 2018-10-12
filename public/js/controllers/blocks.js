@@ -3,7 +3,12 @@ let blocks, mempoolSubsidy, blocksHolder;
 
 function figureNumberOfBlocksToDisplay() {
     const pageContentPaddingMargin = $('body').outerHeight(true) - $('body').height();
-    const availableHeight = $(window).height() - pageContentPaddingMargin - ($('.blocks-holder').position().top * 1.5); // 200px for other padding and margin before
+    const leftSectionHeight = $('.statCard').outerHeight() * $('.statCard').length;
+
+    let availableHeight = $(window).height() - pageContentPaddingMargin - (blocksHolder.position().top * 1.5);
+    if (leftSectionHeight > availableHeight) {
+        availableHeight = leftSectionHeight;
+    }
     const availableWidth = blocksHolder.outerWidth();
 
     const blockWidth = $('.blocks-holder > .decredblockWrap').outerWidth(true);
@@ -45,7 +50,8 @@ function displayBlocks() {
     const blockHtmlElements = blocks.slice(1).map(newBlockHtmlElement).join("\n");
     blocksHolder.append(blockHtmlElements);
 
-    figureNumberOfBlocksToDisplay();
+    // allow time for left panel to load in order to properly estimate available space on the right
+    setTimeout(figureNumberOfBlocksToDisplay, 500);
     window.addEventListener('resize', () => {
         figureNumberOfBlocksToDisplay();
     });
@@ -181,6 +187,7 @@ function makeTicketAndRevoctionElements(tickets, revocations) {
         totalDCR += ticket.Total;
         return makeTxElement(ticket, "block-ticket", "Ticket");
     });
+    ticketElements.splice(30);
     const revocationElements = (revocations || []).map(revocation => {
         totalDCR += revocation.Total;
         return makeTxElement(revocation, "block-rev", "Revocation");

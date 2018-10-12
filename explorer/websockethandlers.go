@@ -131,10 +131,12 @@ func (exp *explorerUI) RootWebsocket(w http.ResponseWriter, r *http.Request) {
 
 				case "getmempooltxs":
 					exp.MempoolData.RLock()
+					mempoolData := exp.MempoolData
+					exp.MempoolData.RUnlock()
 
-					txCount := len(exp.MempoolData.Transactions)
+					txCount := len(mempoolData.Transactions)
 					mempoolTxs := make([]*TxInfo, 0, txCount)
-					for _, tx := range exp.MempoolData.Transactions {
+					for _, tx := range mempoolData.Transactions {
 						exptx := exp.blockData.GetExplorerTx(tx.Hash)
 						for _, vin := range exptx.Vin {
 							if vin.IsCoinBase() {
@@ -143,36 +145,35 @@ func (exp *explorerUI) RootWebsocket(w http.ResponseWriter, r *http.Request) {
 						}
 						mempoolTxs = append(mempoolTxs, exptx)
 					}
-					ticketsCount := len(exp.MempoolData.Tickets)
+					ticketsCount := len(mempoolData.Tickets)
 					mempoolTickets := make([]*TxInfo, 0, ticketsCount)
-					for _, tx := range exp.MempoolData.Tickets {
+					for _, tx := range mempoolData.Tickets {
 						exptx := exp.blockData.GetExplorerTx(tx.Hash)
 						mempoolTickets = append(mempoolTickets, exptx)
 					}
 					mempoolVotes := make([]*TxInfo, 0)
-					for _, tx := range exp.MempoolData.Votes {
+					for _, tx := range mempoolData.Votes {
 						if tx.VoteInfo.ForLastBlock == true {
 							exptx := exp.blockData.GetExplorerTx(tx.Hash)
 							mempoolVotes = append(mempoolVotes, exptx)
 						}
 					}
-					revCount := len(exp.MempoolData.Revocations)
+					revCount := len(mempoolData.Revocations)
 					mempoolRevs := make([]*TxInfo, 0, revCount)
-					for _, tx := range exp.MempoolData.Revocations {
+					for _, tx := range mempoolData.Revocations {
 						exptx := exp.blockData.GetExplorerTx(tx.Hash)
 						mempoolRevs = append(mempoolRevs, exptx)
 					}
-					mempoolData := MempoolData{
+
+					data := MempoolData{
 						Transactions: trimTxInfo(mempoolTxs),
 						Tickets:      trimTxInfo(mempoolTickets),
 						Votes:        trimTxInfo(mempoolVotes),
 						Revocations:  trimTxInfo(mempoolRevs),
-						Total:        exp.MempoolData.TotalOut,
-						Time:         exp.MempoolData.LastBlockTime,
+						Total:        mempoolData.TotalOut,
+						Time:         mempoolData.LastBlockTime,
 					}
-					msg, err := json.Marshal(mempoolData)
-
-					exp.MempoolData.RUnlock()
+					msg, err := json.Marshal(data)
 
 					if err != nil {
 						log.Warn("Invalid JSON message: ", err)

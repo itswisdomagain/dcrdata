@@ -23,8 +23,8 @@
     <title>{{.}}</title>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/main.css" rel="stylesheet">
+    <link href="/css/nexthome.css" rel="stylesheet">
     <link href="/css/charts.css" rel="stylesheet">
-     <link href="/css/nexthome.css" rel="stylesheet">
     <!-- <link rel="stylesheet/less" type="text/css" href="/css/dynamic.less"> -->
     <script src="/js/turbolinks.js"></script>
     <script src="/js/jquery.js"></script>
@@ -194,36 +194,26 @@
         console.log('Starting websocket');
         console.log("createdWebSocket", uri, ws)
         ws.registerEvtHandler("open", function() {
-            console.log('Connected')
             updateConnectionStatus('Connected', true);
         });
 
         ws.registerEvtHandler("close", function() {
-            console.log('Disconnected')
             updateConnectionStatus('Disconnected', false);
         });
 
         ws.registerEvtHandler("error", function(evt) {
-            console.log("WebSocket error:", evt);
             updateConnectionStatus('Disconnected', false);
         });
 
-        ws.registerEvtHandler("ping", function(evt) {
-            console.log("ping. users online: ", evt)
-            //ws.send("pong", "copy")
-        });
         ws.registerEvtHandler("decodetxResp", function(evt) {
-            console.log("Got message: ", evt);
             $("#decode_header").text("Decoded tx");
             $("#decoded_tx").text(evt);
         })
         ws.registerEvtHandler("sendtxResp", function(evt) {
-            console.log("Got message: ", evt);
             $("#decode_header").text("Sent tx");
             $("#decoded_tx").text(evt);
         })
         var updateBlockData = function (event) {
-            console.log("Received newblock message", event);
             var newBlock = JSON.parse(event);
             var confirms = $('[data-confirmation-block-height]');
             $.each(confirms, function(i, v) {
@@ -298,8 +288,7 @@
         ws.registerEvtHandler("newblock", updateBlockData);
 
         ws.registerEvtHandler("mempool", function(event){
-            if (window.location.pathname == "/nexthome") {
-                console.log("mempool update received, requesting for more data")
+            if (window.location.pathname === "/nexthome") {
                 ws.send("getmempooltxs", "")
             }
             else {
@@ -312,7 +301,7 @@
         });
 
         ws.registerEvtHandler("getmempooltxsResp", function(event) {
-            if (window.location.pathname == "/nexthome") {
+            if (window.location.pathname === "/nexthome") {
                 handleMempoolUpdate(event);
             }
         });
