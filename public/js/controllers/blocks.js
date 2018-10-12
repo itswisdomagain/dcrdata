@@ -75,8 +75,8 @@ function makeMempoolBlock(block) {
                     <div class="block-rows">
                         ${makeRewardsElement(mempoolSubsidy, fees, block.Votes.length, '#')}
                         ${makeVoteElements(block.Votes)}
-                        ${makeTicketAndRevoctionElements(block.Tickets, block.Revocations)}
-                        ${makeTransactionElements(block.Transactions)}
+                        ${makeTicketAndRevoctionElements(block.Tickets, block.Revocations, '/mempool')}
+                        ${makeTransactionElements(block.Transactions, '/mempool')}
                     </div>
                 </div>
             </div>`;
@@ -97,8 +97,8 @@ function newBlockHtmlElement(block) {
                     <div class="block-rows">
                         ${makeRewardsElement(block.Subsidy, block.MiningFee, block.Votes.length, rewardTxId)}
                         ${makeVoteElements(block.Votes)}
-                        ${makeTicketAndRevoctionElements(block.Tickets, block.Revocations)}
-                        ${makeTransactionElements(block.Transactions)}
+                        ${makeTicketAndRevoctionElements(block.Tickets, block.Revocations, `/block/${block.Height}`)}
+                        ${makeTransactionElements(block.Transactions, `/block/${block.Height}`)}
                     </div>
                 </div>
             </div>`;
@@ -180,14 +180,20 @@ function makeVoteElements(votes) {
             </div>`;
 }
 
-function makeTicketAndRevoctionElements(tickets, revocations) {
+function makeTicketAndRevoctionElements(tickets, revocations, blockHref) {
     let totalDCR = 0;
 
     const ticketElements = (tickets || []).map(ticket => {
         totalDCR += ticket.Total;
         return makeTxElement(ticket, "block-ticket", "Ticket");
     });
-    ticketElements.splice(30);
+    if (ticketElements.length > 50) {
+        const total = ticketElements.length;
+        ticketElements.splice(30);
+        ticketElements.push(`<span class="block-ticket" style="flex-grow: 10; flex-basis: 50px;" title="Total of ${total} tickets">
+                                <a href="${blockHref}">+ ${total - 30}</a>
+                            </span>`);
+    }
     const revocationElements = (revocations || []).map(revocation => {
         totalDCR += revocation.Total;
         return makeTxElement(revocation, "block-rev", "Revocation");
@@ -207,7 +213,7 @@ function makeTicketAndRevoctionElements(tickets, revocations) {
             </div>`;
 }
 
-function makeTransactionElements(transactions) {
+function makeTransactionElements(transactions, blockHref) {
     let totalDCR = 0;
     const transactionElements = (transactions || [])
                 .filter(tx => !tx.Coinbase)
@@ -215,6 +221,14 @@ function makeTransactionElements(transactions) {
                     totalDCR += tx.Total;
                     return makeTxElement(tx, "block-tx", "Transaction", true);
                 });
+
+    if (transactionElements.length > 50) {
+        const total = transactionElements.length;
+        transactionElements.splice(30);
+        transactionElements.push(`<span class="block-tx" style="flex-grow: 10; flex-basis: 50px;" title="Total of ${total} transactions">
+                                    <a href="${blockHref}">+ ${total - 30}</a>
+                                </span>`);
+    }
 
     // totalDCR = Math.round(totalDCR);
     totalDCR = 1;

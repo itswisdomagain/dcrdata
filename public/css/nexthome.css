@@ -109,6 +109,12 @@ body {
     display: block;
     width: 100%;
     height: 100%;
+    text-align: center;
+    line-height: 1.3;
+    color: #5a5a5a;
+}
+.block-rows > div > span > a, .block-rows > div > span > a:hover {
+    text-decoration: none;
 }
 #nexthome .container {
     max-width: 90% !important;
