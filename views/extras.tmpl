@@ -185,14 +185,11 @@
     var ws; // websocket global
     async function createWebSocket(loc) {
         // wait a bit to prevent websocket churn from drive by page loads
-        console.log('Waiting to create websocket');
         $('#connection').removeClass('hidden');
         var uri = getSocketURI(loc)
         ws = new MessageSocket(uri);
         await sleep(3000);
         ws.connect()
-        console.log('Starting websocket');
-        console.log("createdWebSocket", uri, ws)
         ws.registerEvtHandler("open", function() {
             updateConnectionStatus('Connected', true);
         });
@@ -210,10 +207,12 @@
             $("#decoded_tx").text(evt);
         })
         ws.registerEvtHandler("sendtxResp", function(evt) {
+            console.log("Got message: ", evt);
             $("#decode_header").text("Sent tx");
             $("#decoded_tx").text(evt);
         })
         var updateBlockData = function (event) {
+            console.log("Received newblock message", event);
             var newBlock = JSON.parse(event);
             var confirms = $('[data-confirmation-block-height]');
             $.each(confirms, function(i, v) {

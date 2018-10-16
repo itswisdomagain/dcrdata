@@ -18,7 +18,6 @@
     }
 
     function voteTxTableRow(tx) {
-        console.debug("new vote row: ", tx)
         return `<tr class="flash" data-height="${tx.vote_info.block_validation.height}" data-blockhash="${tx.vote_info.block_validation.hash}">
             <td class="break-word"><span><a class="hash" href="/tx/${tx.hash}">${tx.hash}</a></span></td>
             <td class="mono fs15"><span><a href="/block/${tx.vote_info.block_validation.hash}">${tx.vote_info.block_validation.height}</a></span></td>
@@ -73,7 +72,6 @@
             })
             ws.registerEvtHandler("mempool", (evt) => {
                 var m = JSON.parse(evt)
-                console.log("update", evt);
                 this.renderLatestTransactions(m.latest, false)
                 $(this.numTicketTarget).text(m.num_tickets)
                 $(this.numVoteTarget).text(m.num_votes)
@@ -81,7 +79,6 @@
                 ws.send("getmempooltxs", "")
             });
             ws.registerEvtHandler("getmempooltxsResp", (evt) => {
-                console.log("resp", evt);
                 var m = JSON.parse(evt)
                 this.renderLatestTransactions(m.latest, true)
                 keyNav(evt, false, true)
