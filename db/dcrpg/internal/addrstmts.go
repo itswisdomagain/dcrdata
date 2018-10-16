@@ -160,8 +160,10 @@ const (
 	SelectAddressOldestTxBlockTime = `SELECT block_time FROM addresses WHERE
 		address=$1 ORDER BY block_time DESC LIMIT 1;`
 
-	// Rtx defines Regular transactions grouped into (SentRtx and ReceivedRtx),
-	// SSTx defines tickets, SSGen defines votes and SSRtx defines Revocation transactions
+	// SelectAddressTxTypesByAddress gets the transaction type histogram for the
+	// given address using block time binning with bin size of block_time.
+	// Regular transactions are grouped into (SentRtx and ReceivedRtx), SSTx
+	// defines tickets, SSGen defines votes, and SSRtx defines revocations.
 	SelectAddressTxTypesByAddress = `SELECT (block_time/$1)*$1 as timestamp,
 		COUNT(CASE WHEN tx_type = 0 AND is_funding = false THEN 1 ELSE NULL END) as SentRtx,
 		COUNT(CASE WHEN tx_type = 0 AND is_funding = true THEN 1 ELSE NULL END) as ReceivedRtx,
@@ -187,7 +189,7 @@ const (
 	// SelectAddressesGloballyInvalid selects the row ids of the addresses table
 	// corresponding to transactions that should have valid_mainchain set to
 	// false according to the transactions table. Should is defined as any
-	// occurence of a given transaction (hash) being flagged as is_valid AND
+	// occurrence of a given transaction (hash) being flagged as is_valid AND
 	// is_mainchain.
 	SelectAddressesGloballyInvalid = `SELECT id, valid_mainchain
 		FROM addresses

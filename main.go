@@ -68,18 +68,18 @@ func mainCore() error {
 	}
 
 	if cfg.UseGops {
-		// Start gops diagnostic agent, without shutdown cleanup
+		// Start gops diagnostic agent, with shutdown cleanup.
 		if err = agent.Listen(agent.Options{}); err != nil {
 			return err
 		}
 		defer agent.Close()
 	}
 
-	// Start with version info
+	// Display app version.
 	log.Infof("%s version %v (Go version %s)", version.AppName,
 		version.Version(), runtime.Version())
 
-	// PostgreSQL
+	// PostgreSQL backend is enabled via FullMode config option (--pg switch).
 	usePG := cfg.FullMode
 	if usePG {
 		log.Info(`Running in full-functionality mode with PostgreSQL backend enabled.`)
@@ -87,12 +87,10 @@ func mainCore() error {
 		log.Info(`Running in "Lite" mode with only SQLite backend and limited functionality.`)
 	}
 
-	// Connect to dcrd RPC server using websockets
-
-	// Set up the notification handler to deliver blocks through a channel.
+	// Setup the notification handlers.
 	notify.MakeNtfnChans(cfg.MonitorMempool, usePG)
 
-	// Daemon client connection
+	// Connect to dcrd RPC server using a websocket.
 	ntfnHandlers, collectionQueue := notify.MakeNodeNtfnHandlers()
 	dcrdClient, nodeVer, err := connectNodeRPC(cfg, ntfnHandlers)
 	if err != nil || dcrdClient == nil {
@@ -100,7 +98,8 @@ func mainCore() error {
 	}
 
 	defer func() {
-		// Closing these channels should be unnecessary if quit was handled right
+		// The individial hander's loops should close the notifications channels
+		// on quit, but do it here too to be sure.
 		notify.CloseNtfnChans()
 
 		if dcrdClient != nil {
@@ -112,7 +111,7 @@ func mainCore() error {
 		time.Sleep(250 * time.Millisecond)
 	}()
 
-	// Display connected network
+	// Display connected network (e.g. mainnet, testnet, simnet).
 	curnet, err := dcrdClient.GetCurrentNet()
 	if err != nil {
 		return fmt.Errorf("Unable to get current network from dcrd: %v", err)
@@ -159,7 +158,7 @@ func mainCore() error {
 	log.Infof("SQLite DB successfully opened: %s", cfg.DBFileName)
 	defer baseDB.Close()
 
-	// PostgreSQL
+	// Auxiliary DB (currently PostgreSQL)
 	var auxDB *dcrpg.ChainDBRPC
 	var newPGIndexes, updateAllAddresses, updateAllVotes bool
 	if usePG {
@@ -218,7 +217,7 @@ func mainCore() error {
 	// with auxDB. Setting fetchToHeight to a large number allows this.
 	var fetchToHeight = int64(math.MaxInt32)
 	if usePG {
-		// Get the last block added to the aux DB
+		// Get the last block added to the aux DB.
 		var heightDB uint64
 		heightDB, err = auxDB.HeightDB()
 		lastBlockPG := int64(heightDB)
@@ -226,31 +225,35 @@ func mainCore() error {
 			if err != sql.ErrNoRows {
 				return fmt.Errorf("Unable to get height from PostgreSQL DB: %v", err)
 			}
+			// lastBlockPG of 0 implies genesis is already processed.
 			lastBlockPG = -1
 		}
 
-		// Allow stakedb to catch up to the auxDB, but after fetchToHeight,
-		// stakedb must receive block signals from auxDB.
+		// Allow wiredDB/stakedb to catch up to the auxDB, but after
+		// fetchToHeight, wiredDB must receive block signals from auxDB, and
+		// stakedb must send connect signals to auxDB.
 		fetchToHeight = lastBlockPG + 1
 
-		// PG height and StakeDatabase height must be equal. StakeDatabase will
-		// catch up automatically if it is behind, but we must manually rewind
-		// it here if it is ahead of PG.
+		// Aux DB height and stakedb height must be equal. StakeDatabase will
+		// catch up automatically if it is behind, but we must rewind it here if
+		// it is ahead of auxDB. For auxDB to receive notification from
+		// StakeDatabase when the required blocks are connected, the
+		// StakeDatabase must be at the same height or lower than auxDB.
 		stakedbHeight := int64(baseDB.GetStakeDB().Height())
 		fromHeight := stakedbHeight
 		if uint64(stakedbHeight) > heightDB {
-			// rewind stakedb and log at intervals of 200
+			// Rewind stakedb and log at intervals of 200 blocks.
 			if stakedbHeight == fromHeight || stakedbHeight%200 == 0 {
-				log.Infof("Rewinding StakeDatabase from %d to %d.", stakedbHeight, lastBlockPG)
+				log.Infof("Rewinding StakeDatabase from %d to %d.", stakedbHeight, heightDB)
 			}
-			stakedbHeight, err = baseDB.RewindStakeDB(lastBlockPG, quit)
+			stakedbHeight, err = baseDB.RewindStakeDB(int64(heightDB), quit)
 			if err != nil {
 				return fmt.Errorf("RewindStakeDB failed: %v", err)
 			}
 			// stakedbHeight is always rewound to a height of zero even when lastBlockPG is -1.
 			if stakedbHeight != lastBlockPG && stakedbHeight > 0 {
 				return fmt.Errorf("failed to rewind stakedb: got %d, expecting %d",
-					stakedbHeight, lastBlockPG)
+					stakedbHeight, heightDB)
 			}
 		}
 
@@ -300,7 +303,7 @@ func mainCore() error {
 		}
 	}
 
-	// SetAgendaDB Path
+	// Set the path to the AgendaDB file.
 	agendadb.SetDbPath(filepath.Join(cfg.DataDir, cfg.AgendaDBFileName))
 
 	// AgendaDB upgrade check
@@ -314,7 +317,7 @@ func mainCore() error {
 		return fmt.Errorf("Failed to create block data collector")
 	}
 
-	// Build a slice of each required saver type for each data source
+	// Build a slice of each required saver type for each data source.
 	var blockDataSavers []blockdata.BlockDataSaver
 	var mempoolSavers []mempool.MempoolDataSaver
 	if usePG {
@@ -331,14 +334,14 @@ func mainCore() error {
 	blockDataSavers = append(blockDataSavers, &baseDB)
 	mempoolSavers = append(mempoolSavers, baseDB.MPC)
 
-	// Allow Ctrl-C to halt startup
+	// Allow Ctrl-C to halt startup here.
 	select {
 	case <-quit:
 		return nil
 	default:
 	}
 
-	// Create the explorer system
+	// Create the explorer system.
 	explore := explorer.New(&baseDB, auxDB, cfg.UseRealIP, version.Version(), !cfg.NoDevPrefetch)
 	if explore == nil {
 		return fmt.Errorf("failed to create new explorer (templates missing?)")
@@ -539,9 +542,9 @@ func mainCore() error {
 
 	// Sync up with the blockchain after the web server has loaded.
 	getSyncd := func(updateAddys, updateVotes, newPGInds bool,
-		fetchHeight int64) (int64, int64, error) {
-		// Simultaneously synchronize the ChainDB (PostgreSQL) and the block/stake
-		// info DB (sqlite). Results are returned over channels:
+		fetchHeightInBaseDB int64) (int64, int64, error) {
+		// Simultaneously synchronize the ChainDB (PostgreSQL) and the
+		// block/stake info DB (sqlite). Results are returned over channels:
 		sqliteSyncRes := make(chan dbtypes.SyncResult)
 		pgSyncRes := make(chan dbtypes.SyncResult)
 
@@ -561,7 +564,7 @@ func mainCore() error {
 		go auxDB.SyncChainDBAsync(pgSyncRes, smartClient, quit,
 			updateAddys, updateVotes, newPGInds, latestBlockHash, barLoad)
 
-		// Wait for the results
+		// Wait for the results from both of these DBs.
 		return waitForSync(sqliteSyncRes, pgSyncRes, usePG, quit)
 	}
 
@@ -573,8 +576,8 @@ func mainCore() error {
 
 	if usePG {
 		// After sync and indexing, must use upsert statement, which checks for
-		// duplicate entries and updates instead of erroring. SyncChainDB should set
-		// this on successful sync, but do it again anyway.
+		// duplicate entries and updates instead of erroring. SyncChainDB should
+		// set this on successful sync, but do it again anyway.
 		auxDB.EnableDuplicateCheckOnInsert(true)
 	}
 

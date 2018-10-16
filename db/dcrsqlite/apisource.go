@@ -162,7 +162,12 @@ func (db *wiredDB) CheckConnectivity() error {
 }
 
 // SyncDBAsync is like SyncDB except it also takes a result channel where the
-// caller should wait to receive the result.
+// caller should wait to receive the result. When a slave BlockGetter is in use,
+// fetchToHeight is used to indicate at what height the MasterBlockGetter will
+// start sending blocks for processing. e.g. When an auxiliary DB owns the
+// MasterBlockGetter, fetchToHeight should be one past the best block in the aux
+// DB, thus putting wiredDB sync into "catch up" mode where it just pulls blocks
+// from RPC until it matches the auxDB height and coordination begins.
 func (db *wiredDB) SyncDBAsync(res chan dbtypes.SyncResult,
 	quit chan struct{}, blockGetter rpcutils.BlockGetter, fetchToHeight int64,
 	updateExplorer chan *chainhash.Hash, barLoad chan *dbtypes.ProgressBarLoad) {
@@ -176,10 +181,13 @@ func (db *wiredDB) SyncDBAsync(res chan dbtypes.SyncResult,
 	}
 	// Set the first height at which the smart client should wait for the block.
 	if !(blockGetter == nil || blockGetter.(*rpcutils.BlockGate) == nil) {
+		// Set the first block notification to come on the waitChan to
+		// fetchToHeight, which as described above should be set as the first
+		// block to be processed (and relayed to this BlockGetter) by the
+		// auxiliary DB sync function. e.g. (*ChainDB).SyncChainDB.
 		log.Debugf("Setting block gate height to %d", fetchToHeight)
 		db.initWaitChan(blockGetter.WaitForHeight(fetchToHeight))
 	}
-
 	go func() {
 		height, err := db.resyncDB(quit, blockGetter, fetchToHeight, updateExplorer, barLoad)
 		res <- dbtypes.SyncResult{
@@ -189,9 +197,11 @@ func (db *wiredDB) SyncDBAsync(res chan dbtypes.SyncResult,
 	}()
 }
 
+// SyncDB is like SyncDBAsync, except it uses synchronous execution (the call to
+// resyncDB is a blocking call).
 func (db *wiredDB) SyncDB(wg *sync.WaitGroup, quit chan struct{},
 	blockGetter rpcutils.BlockGetter, fetchToHeight int64) (int64, error) {
-	// Ensure the db is working
+	// Ensure the db is working.
 	defer wg.Done()
 	if err := db.CheckConnectivity(); err != nil {
 		return -1, fmt.Errorf("CheckConnectivity failed: %v", err)
@@ -228,7 +238,9 @@ func (db *wiredDB) GetChainParams() *chaincfg.Params {
 func (db *wiredDB) GetBlockHash(idx int64) (string, error) {
 	hash, err := db.RetrieveBlockHash(idx)
 	if err != nil {
-		log.Errorf("Unable to get block hash for block number %d: %v", idx, err)
+		if err != sql.ErrNoRows {
+			log.Errorf("Unable to get block hash for block number %d: %v", idx, err)
+		}
 		return "", err
 	}
 	return hash, nil
@@ -237,22 +249,24 @@ func (db *wiredDB) GetBlockHash(idx int64) (string, error) {
 func (db *wiredDB) GetBlockHeight(hash string) (int64, error) {
 	height, err := db.RetrieveBlockHeight(hash)
 	if err != nil {
-		log.Errorf("Unable to get block height for hash %s: %v", hash, err)
+		if err != sql.ErrNoRows {
+			log.Errorf("Unable to get block height for hash %s: %v", hash, err)
+		}
 		return -1, err
 	}
 	return height, nil
 }
 
 func (db *wiredDB) GetHeader(idx int) *dcrjson.GetBlockHeaderVerboseResult {
-	return rpcutils.GetBlockHeaderVerbose(db.client, db.params, int64(idx))
+	return rpcutils.GetBlockHeaderVerbose(db.client, int64(idx))
 }
 
 func (db *wiredDB) GetBlockVerbose(idx int, verboseTx bool) *dcrjson.GetBlockVerboseResult {
-	return rpcutils.GetBlockVerbose(db.client, db.params, int64(idx), verboseTx)
+	return rpcutils.GetBlockVerbose(db.client, int64(idx), verboseTx)
 }
 
 func (db *wiredDB) GetBlockVerboseByHash(hash string, verboseTx bool) *dcrjson.GetBlockVerboseResult {
-	return rpcutils.GetBlockVerboseByHash(db.client, db.params, hash, verboseTx)
+	return rpcutils.GetBlockVerboseByHash(db.client, hash, verboseTx)
 }
 
 func (db *wiredDB) CoinSupply() (supply *apitypes.CoinSupply) {
@@ -285,13 +299,13 @@ func (db *wiredDB) BlockSubsidy(height int64, voters uint16) *dcrjson.GetBlockSu
 }
 
 func (db *wiredDB) GetTransactionsForBlock(idx int64) *apitypes.BlockTransactions {
-	blockVerbose := rpcutils.GetBlockVerbose(db.client, db.params, idx, false)
+	blockVerbose := rpcutils.GetBlockVerbose(db.client, idx, false)
 
 	return makeBlockTransactions(blockVerbose)
 }
 
 func (db *wiredDB) GetTransactionsForBlockByHash(hash string) *apitypes.BlockTransactions {
-	blockVerbose := rpcutils.GetBlockVerboseByHash(db.client, db.params, hash, false)
+	blockVerbose := rpcutils.GetBlockVerboseByHash(db.client, hash, false)
 
 	return makeBlockTransactions(blockVerbose)
 }
@@ -636,12 +650,22 @@ func (db *wiredDB) GetSummaryByHash(hash string) *apitypes.BlockDataBasic {
 	return blockSummary
 }
 
+// GetBestBlockSummary retrieves data for the best block in the DB. If there are
+// no blocks in the table (yet), a nil pointer is returned.
 func (db *wiredDB) GetBestBlockSummary() *apitypes.BlockDataBasic {
+	// Attempt to retrieve height of best block in DB.
 	dbBlkHeight, err := db.GetBlockSummaryHeight()
 	if err != nil {
 		log.Errorf("GetBlockSummaryHeight failed: %v", err)
 		return nil
 	}
+
+	// Empty table is not an error.
+	if dbBlkHeight == -1 {
+		return nil
+	}
+
+	// Retrieve the block data.
 	blockSummary, err := db.RetrieveBlockSummary(dbBlkHeight)
 	if err != nil {
 		log.Errorf("Unable to retrieve block %d summary: %v", dbBlkHeight, err)
@@ -1077,11 +1101,12 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 		NextHash:              data.NextHash,
 		StakeValidationHeight: db.params.StakeValidationHeight,
 		AllTxs:                (uint32(b.Voters) + uint32(b.Transactions) + uint32(b.FreshStake)),
+		Subsidy:               db.BlockSubsidy(b.Height, b.Voters),
 	}
 
-	votes := make([]*explorer.TxBasic, 0, block.Voters)
-	revocations := make([]*explorer.TxBasic, 0, block.Revocations)
-	tickets := make([]*explorer.TxBasic, 0, block.FreshStake)
+	votes := make([]*explorer.TxInfo, 0, block.Voters)
+	revocations := make([]*explorer.TxInfo, 0, block.Revocations)
+	tickets := make([]*explorer.TxInfo, 0, block.FreshStake)
 
 	for _, tx := range data.RawSTx {
 		msgTx, err := txhelpers.MsgTxFromHex(tx.Hex)
@@ -1091,28 +1116,24 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 		}
 		switch stake.DetermineTxType(msgTx) {
 		case stake.TxTypeSSGen:
-			stx := makeExplorerTxBasic(tx, msgTx, db.params)
+			stx := db.GetExplorerTx(tx.Txid)
 			// Fees for votes should be zero, but if the transaction was created
 			// with unmatched inputs/outputs then the remainder becomes a fee.
 			// Account for this possibility by calculating the fee for votes as
 			// well.
 			votes = append(votes, stx)
 		case stake.TxTypeSStx:
-			stx := makeExplorerTxBasic(tx, msgTx, db.params)
+			stx := db.GetExplorerTx(tx.Txid)
 			tickets = append(tickets, stx)
 		case stake.TxTypeSSRtx:
-			stx := makeExplorerTxBasic(tx, msgTx, db.params)
+			stx := db.GetExplorerTx(tx.Txid)
 			revocations = append(revocations, stx)
 		}
 	}
 
-	txs := make([]*explorer.TxBasic, 0, block.Transactions)
+	txs := make([]*explorer.TxInfo, 0, block.Transactions)
 	for _, tx := range data.RawTx {
-		msgTx, err := txhelpers.MsgTxFromHex(tx.Hex)
-		if err != nil {
-			continue
-		}
-		exptx := makeExplorerTxBasic(tx, msgTx, db.params)
+		exptx := db.GetExplorerTx(tx.Txid)
 		for _, vin := range tx.Vin {
 			if vin.IsCoinBase() {
 				exptx.Fee, exptx.FeeRate = 0.0, 0.0
@@ -1125,7 +1146,7 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 	block.Revs = revocations
 	block.Tickets = tickets
 
-	sortTx := func(txs []*explorer.TxBasic) {
+	sortTx := func(txs []*explorer.TxInfo) {
 		sort.Slice(txs, func(i, j int) bool {
 			return txs[i].Total > txs[j].Total
 		})
@@ -1136,13 +1157,13 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 	sortTx(block.Revs)
 	sortTx(block.Tickets)
 
-	getTotalFee := func(txs []*explorer.TxBasic) (total dcrutil.Amount) {
+	getTotalFee := func(txs []*explorer.TxInfo) (total dcrutil.Amount) {
 		for _, tx := range txs {
 			total += tx.Fee
 		}
 		return
 	}
-	getTotalSent := func(txs []*explorer.TxBasic) (total dcrutil.Amount) {
+	getTotalSent := func(txs []*explorer.TxInfo) (total dcrutil.Amount) {
 		for _, tx := range txs {
 			amt, err := dcrutil.NewAmount(tx.Total)
 			if err != nil {
@@ -1154,8 +1175,8 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 	}
 	block.TotalSent = (getTotalSent(block.Tx) + getTotalSent(block.Revs) +
 		getTotalSent(block.Tickets) + getTotalSent(block.Votes)).ToCoin()
-	block.MiningFee = getTotalFee(block.Tx) + getTotalFee(block.Revs) +
-		getTotalFee(block.Tickets) + getTotalFee(block.Votes)
+	block.MiningFee = (getTotalFee(block.Tx) + getTotalFee(block.Revs) +
+		getTotalFee(block.Tickets) + getTotalFee(block.Votes)).ToCoin()
 
 	return block
 }

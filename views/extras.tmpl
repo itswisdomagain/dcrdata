@@ -23,8 +23,8 @@
     <title>{{.}}</title>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/main.css" rel="stylesheet">
+    <link href="/css/nexthome.css" rel="stylesheet">
     <link href="/css/charts.css" rel="stylesheet">
-     <link href="/css/nexthome.css" rel="stylesheet">
     <!-- <link rel="stylesheet/less" type="text/css" href="/css/dynamic.less"> -->
     <script src="/js/turbolinks.js"></script>
     <script src="/js/jquery.js"></script>
@@ -46,9 +46,7 @@
 <header>
 <div class="top-nav">
     <div class="container">
-        <div class="logo">
-            <a class="no-underline" href="/"><img src="/images/logo-2018.svg" alt="dcr-icon"></a>
-        </div>
+        <a class="no-underline logo" href="/"><img src="/images/logo-2018.svg" alt="dcr-icon"></a>
         <div class="right">
             <div class="searchbox full">
                 <form class="navbar-form" role="search" id="search-form" action="/search" style="display: flex;">
@@ -87,7 +85,7 @@
                     <a data-keynav-skip data-turbolinks="false" href="#" class="jsonly" id="keynav-toggle">
                         <span class="text">Enable Hot Keys</span><span class="keys-hint">(&nbsp;&nbsp;<span class="arrows"> &#8592;<br>&#8594;</span>&nbsp;&nbsp;enter&nbsp;&nbsp;\&nbsp;&nbsp;=&nbsp;&nbsp;)</span>
                     </a>
-                    <a data-keynav-skip href="https://github.com/decred/dcrdata#json-rest-api" title="API Endpoints" target="_blank">JSON API Docs</a>
+                    <a data-keynav-skip href="https://github.com/decred/dcrdata#json-rest-api" title="API Endpoints" target="_blank" rel="noopener noreferrer">JSON API Docs</a>
                 </div>
             </div>
         </nav>
@@ -187,35 +185,24 @@
     var ws; // websocket global
     async function createWebSocket(loc) {
         // wait a bit to prevent websocket churn from drive by page loads
-        console.log('Waiting to create websocket');
         $('#connection').removeClass('hidden');
         var uri = getSocketURI(loc)
         ws = new MessageSocket(uri);
         await sleep(3000);
         ws.connect()
-        console.log('Starting websocket');
-        console.log("createdWebSocket", uri, ws)
         ws.registerEvtHandler("open", function() {
-            console.log('Connected')
             updateConnectionStatus('Connected', true);
         });
 
         ws.registerEvtHandler("close", function() {
-            console.log('Disconnected')
             updateConnectionStatus('Disconnected', false);
         });
 
         ws.registerEvtHandler("error", function(evt) {
-            console.log("WebSocket error:", evt);
             updateConnectionStatus('Disconnected', false);
         });
 
-        ws.registerEvtHandler("ping", function(evt) {
-            console.log("ping. users online: ", evt)
-            //ws.send("pong", "copy")
-        });
         ws.registerEvtHandler("decodetxResp", function(evt) {
-            console.log("Got message: ", evt);
             $("#decode_header").text("Decoded tx");
             $("#decoded_tx").text(evt);
         })
@@ -232,9 +219,8 @@
                 if (isNaN($(v).text())) {
                     $(v).text("0");
                 }
-                $(v).text(
-                    newBlock.block.height - $(v).data('confirmation-block-height')
-                )
+                var confirmations = newBlock.block.height - $(v).data('confirmation-block-height');
+                $(v).text("(" + confirmations + (confirmations > 1? " confirmations": " confirmation") + ")")
             })
 
             // block summary data
@@ -275,17 +261,7 @@
                 $("#hashrate").html(humanize.decimalParts(ex.hash_rate, false, 8, false, 2))
                 $("#hashrate-subdata").html("("+ humanize.fmtPercentage(ex.hash_rate_change)+ " in 24hr)")
 
-                var newB = $(".block-info").first().clone(true)
-                newB.find("#block-height").text(b.height)
-                newB.find("#block-age").attr("data-age", b.time)
-                newB.find("#total-sent").html(humanize.decimalParts(b.TotalSent, false, 2, false, 2))
-                newB.find("#tx-count").text("sent in "+b.AllTxs+" transactions")
-                newB.find("#votes").text(b.votes)
-                newB.find("#tickets").text(b.tickets)
-                newB.find("#show-block").attr("href", "/block/" + b.height)
-                $(newB).insertAfter("#mempool-info")
-
-                $(".block-info").last().remove()
+                handleBlockUpdate(newBlock.block)
             }
 
              if (window.location.pathname == "/"){
@@ -311,11 +287,22 @@
         ws.registerEvtHandler("newblock", updateBlockData);
 
         ws.registerEvtHandler("mempool", function(event){
-            var mempool = JSON.parse(event);
-            $("#mempool-total-sent").html(humanize.decimalParts(mempool.total, false, 2, false, 2))
-            $("#mempool-tx-count").text("sent in "+mempool.num_all+" transactions")
-            $("#mempool-votes").text(mempool.num_votes)
-            $("#mempool-tickets").text(mempool.num_tickets)
+            if (window.location.pathname === "/nexthome") {
+                ws.send("getmempooltxs", "")
+            }
+            else {
+                var mempool = JSON.parse(event);
+                $("#mempool-total-sent").html(humanize.decimalParts(mempool.total, false, 2, false, 2))
+                $("#mempool-tx-count").text("sent in "+mempool.num_all+" transactions")
+                $("#mempool-votes").text(mempool.num_votes)
+                $("#mempool-tickets").text(mempool.num_tickets)
+            }
+        });
+
+        ws.registerEvtHandler("getmempooltxsResp", function(event) {
+            if (window.location.pathname === "/nexthome") {
+                handleMempoolUpdate(event);
+            }
         });
     }
 
@@ -384,8 +371,8 @@
 <footer class="navbar-fixed-bottom">
     <div class="container wrapper text-center">
         <div style="text-align: left; margin:0 auto !important; display:inline-block">
-            <a class="nav-item" href="https://github.com/decred/dcrdata" title="dcrdata on GitHub" target="_blank">dcrdata v{{.Version}}</a>
-            <a class="nav-item" href="https://github.com/decred/dcrdata/blob/master/LICENSE" target="_blank">© 2018 The Decred developers (ISC)</a>
+            <a class="nav-item" href="https://github.com/decred/dcrdata" title="dcrdata on GitHub" target="_blank" rel="noopener noreferrer">dcrdata v{{.Version}}</a>
+            <a class="nav-item" href="https://github.com/decred/dcrdata/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">© 2018 The Decred developers (ISC)</a>
         </div>
         <div style="float: right;">
             <span data-turbolinks-permanent class="nav-item" id="connection"

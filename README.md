@@ -35,6 +35,7 @@ The dcrdata repository is a collection of Go packages and apps for
     - ["full" Mode (SQLite and PostgreSQL)](#full-mode-sqlite-and-postgresql)
   - [dcrdata Daemon](#dcrdata-daemon)
     - [Block Explorer](#block-explorer)
+  - [APIs](#apis)
     - [Insight API (EXPERIMENTAL)](#insight-api-experimental)
     - [dcrdata API](#dcrdata-api)
       - [Endpoint List](#endpoint-list)
@@ -415,6 +416,7 @@ List of variables that can be set:
 | The number minimum number of new tickets that must be seen to trigger a new mempool report.                              | DCRDATA_MP_TRIGGER_TICKETS     |
 | Dump to file the fees of all the tickets in mempool.                                                                     | DCRDATA_ENABLE_DUMP_ALL_MP_TIX |
 | SQLite DB file name (default is dcrdata.sqlt.db)                                                                         | DCRDATA_SQLITE_DB_FILE_NAME    |
+| Voting agendas DB file name (default is agendas.db)                                                                      | DCRDATA_AGENDA_DB_FILE_NAME    |
 | Run in "Full Mode" mode, enables postgresql support                                                                      | DCRDATA_ENABLE_FULL_MODE       |
 | PostgreSQL DB name.                                                                                                      | DCRDATA_PG_DB_NAME             |
 | PostgreSQL DB user                                                                                                       | DCRDATA_POSTGRES_USER          |
@@ -422,6 +424,7 @@ List of variables that can be set:
 | port or UNIX socket (e.g. /run/postgresql).                                                                              | DCRDATA_POSTGRES_HOST_URL      |
 | Disable automatic dev fund balance query on new blocks.                                                                  | DCRDATA_DISABLE_DEV_PREFETCH   |
 | Sync to the best block and exit. Do not start the explorer or API.                                                       | DCRDATA_ENABLE_SYNC_N_QUIT     |
+| (experimental) Import side chain blocks from dcrd via the getchaintips RPC.                                              | DCRDATA_IMPORT_SIDE_CHAINS     |
 | Daemon RPC user name                                                                                                     | DCRDATA_DCRD_USER              |
 | Daemon RPC password                                                                                                      | DCRDATA_DCRD_PASS              |
 | Hostname/IP and port of dcrd RPC server                                                                                  | DCRDATA_DCRD_URL               |
@@ -572,34 +575,8 @@ The dcrdata block explorer is exposed by two APIs: a Decred implementation of th
 
 The [Insight API](https://github.com/bitpay/insight-api) is accessible via HTTP via REST or WebSocket. 
 
-To call the REST API, use the `/insight/api` path prefix. To call the Websocket API, use the `/insight/socket.io` path prefix.
+See the [Insight API documentation](api/Insight_API_documentation.md) for further details.
 
-
-#### Endpoint List
-
-| Method           | Path                   | 
-| -------------------- | ---------------------- | 
-| Block              | `/block/{hash}`          |  
-| Block index          | `/block-index/{height}`      |  
-| Raw block (hash)               | `/rawblock/{hash}`   | 
-| Raw block (height)                | `/rawblock/{height}`     |  
-| Raw summaries               | `/blocks (URL query params: limit, blockDate, ...) `   |              
-| Transaction                 | `/tx/{hash}`     |  
-| Raw transaction              | `/rawtx/{hash}`  | 
-| Address         | `/addr/{address}`       | 
-| Address Props   | `/balance, totalReceived, totalSent, /totalSent, unconfirmedBalance` |  
-| UTXOs | `/addr/{address}/utxo`  |  
-| Multi-address UTXOs | `/addrs/{address0, address1, etc}/utxo`  |  
-| POST-variant of multi-address UTXOs | ``  |                     
-| Transactions by block | `/txs/?block={hash}`  |   
-| Transactions by address | `/txs/?address={address}`  |   
-| Transactions for multiple addresses | `/addrs/{addr0, addr1, ...}/txs (params: from, to)`  |   
-| POST-variant for ^^ | `(includes params: noAsm, noScriptSig, noSpent)`  |  
-| Transaction broadcast | `/tx/send (raw tx in POST params) `  | 
-| Sync status (dcrdata) | `/sync`  |  
-| Sync status (dcrd) | `/peer`  |  
-| Decred network status | `/status(with each possible value for the q param)`  |  
-| Estimate fee | `/estimatefee (params: nbBlocks)`  |  
 ### dcrdata API
 
 The dcrdata API is a REST API accessible via HTTP. To call the dcrdata API, use the `/api` path prefix.
